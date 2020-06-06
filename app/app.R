@@ -231,6 +231,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      
                                      div(plotOutput("reg.plot2b", width=fig.width, height=fig.height)),  
                                      div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
                                      #  h4("Plot of the treatment effect estimates"),
                                      #  h4("Plot of the treatment effect estimates"),
                                      # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
@@ -244,7 +245,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Diagnostics",
                                      h4("Four residual plots to check for absence of trends in central tendency and in variability"),
-                                   #  div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
+                                    div(plotOutput("res.diag", width=fig.width, height=fig.height)),       
                                      p(strong("Upper left panel shows the baseline score on the x-axis. 
                                               Upper right panel shows shows time on the x-axis, note though the selected reference level is plotted first.
                                               Bottom left panel is the QQ plot for checking normality of residuals from the GLS fit.
@@ -863,6 +864,91 @@ server <- shinyServer(function(input, output   ) {
       
       
       
+      output$reg.plot4b <- renderPlot({         
+        
+        
+        tmp <- make.data2()$tmp
+        nbaseline <- make.data2()$nbaseline
+        
+        all <- rbind(tmp, nbaseline)
+        
+        #####################################################################################################
+        
+        d <- all  # add this to shown baslein
+        d$trt <- d$treat
+        d$rep <- d$unit
+        d$yij <- d$y
+        d$time <- factor(d$time)
+        
+        # lets get counts to put in ribbons
+        d$trt <- factor(d$trt)
+        dx <- unique(d[,c("rep","trt")])
+        table(dx$trt)
+        n <- as.vector(table(dx$trt))
+        levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+        
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        pd <- position_dodge(.4)
+        pr1=NULL
+        pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
+          stat_boxplot(geom = "errorbar", width = 0.3) +
+          geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
+          geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
+          scale_size_manual( values = c( 1) ) +
+          geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+          stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+                       position=pd, show.legend=FALSE) +
+          scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
+          scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
+          facet_wrap(~trt , ncol=2)    +
+          labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
+          
+          geom_text(data = d %>% group_by( time, trt) %>%
+                      dplyr::summarise(Count = n()) %>%
+                      ungroup %>%
+                      mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
+                    aes(label = paste0("n = ", Count)),
+                    position = pd, size=3, show.legend = FALSE) 
+        
+        
+        print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
+                ggtitle(paste0("There are N=",
+                               length(unique(d$rep)),  
+                               " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
+                theme_bw() +
+                theme(legend.position="none") +
+                theme(#panel.background=element_blank(),
+                  # axis.text.y=element_blank(),
+                  # axis.ticks.y=element_blank(),
+                  # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                  # stop axis being clipped
+                  plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                  legend.text=element_text(size=14),
+                  legend.title=element_text(size=14),
+                  legend.position="none",
+                  axis.text.x  = element_text(size=15),
+                  axis.text.y  = element_text(size=15),
+                  axis.line.x = element_line(color="black"),
+                  axis.line.y = element_line(color="black"),
+                  plot.caption=element_text(hjust = 0, size = 11),
+                  strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                  axis.title.y = element_text(size = rel(1.5), angle = 90),
+                  axis.title.x = element_text(size = rel(1.5), angle = 0),
+                  strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                  panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                  plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+                ) 
+        )
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      }) 
       
       
       
@@ -874,10 +960,18 @@ server <- shinyServer(function(input, output   ) {
       
       
       
+   
       
       
-   # }) 
-    
+      
+      
+      
+      
+      
+      
+      
+      
+      
     
     
     
@@ -1235,58 +1329,58 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # diagnostics
     
-    # output$res.plot  <- renderPlot({       
-    #     
-    #     f <- fit.regression()
-    #     fit <- f$fit.res
-    #     
-    #     d <- f$z
-    #     
-    #     target <- input$Plot
-    #     d <- d[d$test %in% target,]
-    #     d2 <- d
-    #     
-    #     d2$resid <- r <- resid(fit)
-    #     
-    #     d2$fitted <- fitted(fit)
-    #     
-    #     yl <- ylab('Residuals') 
-    #     
-    #     xl <- xlab("time")
-    #     
-    #     p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point (   colour="#69b3a2") + yl 
-    #     
-    #     p3 <- ggplot(d2 , aes(x=time , y=resid )) +  geom_point ( colour="#69b3a2") + yl  + xl +
-    #         stat_summary(fun.data ="mean_sdl", geom='smooth') 
-    #     
-    #     p4 <- ggplot(d2 , aes(sample=resid )) + stat_qq(colour="#69b3a2") +
-    #         geom_abline(intercept=mean(r), slope=sd(r)  ,  colour="black") + 
-    #         xlab('Residuals')   +
-    #         ggtitle( " ")  
-    #     
-    #     # p5 <- d2 %>%
-    #     #   ggplot( aes(x=r)) +
-    #     #   geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1, 
-    #     #  theme(
-    #     #     plot.title = element_text(size=15)
-    #     #   ) 
-    #     library(gridExtra)
-    #     library(grid)
-    #     df <- data.frame(Residuals = r)
-    #     p5 <- ggplot(df, aes(x = Residuals)) + 
-    #         geom_histogram(aes(y =..density..),
-    #                        #breaks = seq(-50, 50, by = 2), 
-    #                        colour = "black", 
-    #                        fill = "#69b3a2") +
-    #         stat_function(fun = dnorm, args = list(mean = 0, sd = sigma(fit)  ))
-    #     
-    #     grid.arrange(p1,  p3, p4,p5, ncol=2,
-    #                  
-    #                  top = textGrob(paste0(input$Plot, " GLS model fit diagnostics"),gp=gpar(fontsize=20,font=3)))
-    #     #+
-    #     #main=paste0(input$Plot, "GLS model fit diagnostics")  #
-    #     
-   # })
+   output$res.diag  <- renderPlot({
+
+       
+       fit <- fit.regression.base()$fit.res
+
+       d<- make.data2()$d
+
+      # target <- input$Plot
+     #  d <- d[d$test %in% target,]
+       d2 <- d
+
+       d2$resid <- r <- resid(fit)
+
+       d2$fitted <- fitted(fit)
+
+       yl <- ylab('Residuals')
+
+       xl <- xlab("time")
+
+       p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point (   colour="#69b3a2") + yl
+
+       p3 <- ggplot(d2 , aes(x=time , y=resid )) +  geom_point ( colour="#69b3a2") + yl  + xl +
+           stat_summary(fun.data ="mean_sdl", geom='smooth')
+
+       p4 <- ggplot(d2 , aes(sample=resid )) + stat_qq(colour="#69b3a2") +
+           geom_abline(intercept=mean(r), slope=sd(r)  ,  colour="black") +
+           xlab('Residuals')   +
+           ggtitle( " ")
+
+       # p5 <- d2 %>%
+       #   ggplot( aes(x=r)) +
+       #   geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1,
+       #  theme(
+       #     plot.title = element_text(size=15)
+       #   )
+       library(gridExtra)
+       library(grid)
+       df <- data.frame(Residuals = r)
+       p5 <- ggplot(df, aes(x = Residuals)) +
+           geom_histogram(aes(y =..density..),
+                          #breaks = seq(-50, 50, by = 2),
+                          colour = "black",
+                          fill = "#69b3a2") +
+           stat_function(fun = dnorm, args = list(mean = 0, sd = sigma(fit)  ))
+
+       grid.arrange(p1,  p3, p4,p5, ncol=2,
+
+                    top = textGrob(paste0(input$Plot, " GLS model fit diagnostics"),gp=gpar(fontsize=20,font=3)))
+       #+
+       #main=paste0(input$Plot, "GLS model fit diagnostics")  #
+
+   })
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # listing of simulated data
