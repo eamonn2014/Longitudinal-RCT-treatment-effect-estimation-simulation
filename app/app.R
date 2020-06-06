@@ -38,11 +38,18 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                     gradient = "linear",
                     direction = "bottom"
                 ),
-                h3("Presenting the results of diagnostic tests routinely ordered to determine general health status"),
+                h3("Simulating and analysing longitudianal data and estimating a treatment effect "),
                 shinyUI(pageWithSidebar(
                     headerPanel(" "),
                     
-                    sidebarPanel( 
+                    
+                    
+                    #sidebarPanel( 
+                      
+                      sidebarPanel( width=3 ,
+                                    tags$style(type="text/css", ".span8 .well { background-color: #00FFFF; }"),
+                      
+                      
                         div(p("xxxxxxxxxxx")),
                         
                         div(
@@ -51,12 +58,23 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                          onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton("resample", "Simulate a new sample"),
                             br(), br(),
-                            
+                            tags$style(".well {background-color:#b6aebd ;}"), 
                             div(strong("Select the parameters using the sliders below"),p(" ")),
                             
                             div(("  
                            xxxxxxxxxxxxxxxxxx ")),
                             br(),
+                            
+                            tags$head(
+                              tags$style(HTML('#ab1{background-color:orange}'))
+                            ),
+                            
+                            tags$head(
+                              tags$style(HTML('#resample{background-color:orange}'))
+                            ),
+                            
+                            
+                            
                             # selectInput("Plot",
                             #             strong("1. Select which biochemistry test to present"),
                             #             choices=biochemistry),
@@ -76,7 +94,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             sliderInput("N",
                                         "No of subjects",
-                                        min=2, max=500, step=1, value=600, ticks=FALSE),
+                                        min=2, max=500, step=1, value=200, ticks=FALSE),
                             
                             sliderInput("beta0", "Average intercept", 
                                         min = -10, max = 10, step=0.5, value = c(10), ticks=FALSE) ,
@@ -158,7 +176,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
      
                    ")), 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
-                            tabPanel("Plotting the data", 
+                            tabPanel("Plot and lmer fit", 
                                      #    h2("Plotting the data"),
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
                                      
@@ -174,10 +192,12 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Summary statistics", value=3, 
+                            tabPanel("Gls fit", value=3, 
                                      #  div( verbatimTextOutput("table2")),
                                      h4("xxxxxxxxxxxxxxxxxxx"),#
                                      h6("xxxxxxxxxxxxxxxx"),
+                                     div(class="span7", verbatimTextOutput("reg.summary1")),
+                                     div(class="span7", verbatimTextOutput("reg.summary2")),
                                    #  DT::dataTableOutput("table2"),
                                      #h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                      # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
@@ -398,9 +418,66 @@ server <- shinyServer(function(input, output   ) {
     
     
     
+    fit.regression.gls0 <- reactive({
+      
+      flat.df <- make.data()$flat.df
+      ## new is this what we expect
     
+      time.ref <-  input$time.ref
+      
+      tmp <- flat.df
+      tmp$j <- factor(tmp$j)
+      tmp$j <- relevel(tmp$j, ref=time.ref)
+
+      table(tmp$j, tmp$time)
+      tmp$j <- as.factor(tmp$j )
+      
+      ddz <<- datadist(tmp)  # need the double in rshiny environ <<
+      options(datadist='ddz')
+      
+      #j works but not time consecutive integer error?
+      table(tmp$j, tmp$time)
+      tmp$j <- as.factor(tmp$j )
+      
+      fit.res <- NULL
+      (fit.res <-
+          tryCatch(Gls(y  ~ treat + j * treat ,
+                       correlation=corSymm(form = ~as.numeric(j) | unit) ,
+                       weights=varIdent(form=~1|j),
+                       tmp, x=TRUE,
+                       na.action=na.exclude ),
+                   error=function(e) e)
+      )
+      
+      fit <-  fit.res
+      
+      time. <- rep(1:(J))
+      
+      k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
+                           list(j=time.,  treat = "Placebo" ))
+      
+      k1a
+      
+      
+      return(list(fit.res= fit.res , k1a=k1a ))
+      
+    })     
     
+    output$reg.summary1 <- renderPrint({
+      
+      summary <- fit.regression.gls0()$fit.res
+      
+      return(list(summary))
+      
+    })  
     
+    output$reg.summary2 <- renderPrint({
+      
+      summary <- fit.regression.gls0()$k1a
+      
+      return(list(summary))
+      
+    })  
     
     
     
