@@ -19,40 +19,13 @@ library(shinythemes)        # more funky looking apps
 p1 <- function(x) {formatC(x, format="f", digits=1)}
 p2 <- function(x) {formatC(x, format="f", digits=2)}
 options(width=100)
-#set.seed(12345) #reproducible
-
+ 
 
 # function to create longitudinal data
 
 is.even <- function(x){ x %% 2 == 0 }
 
-biochemistry <- c(
-    "Fasting blood glucose (mg/dL)"  ,
-    "HbA1c glycosylated hemoglobin (%)",  
-    "Non fasting blood Glucose (mg/dL)" , 
-    "Calcium (mmol/L)"  ,
-    "Chloride (mmol/L)" ,
-    "Creatine phosphokinase (U/L)",  
-    "Inorganic phophorous (mmol/L)",
-    "Magnesium (mmol/L)"   ,
-    "Potassium (mmol/L)"  ,
-    "Sodium (mmol/L)" ,
-    "Albumin (g/L)"   ,
-    "Blood urea nitrogen (mmol/L)"  ,
-    "Creatinine (umol/L)" ,
-    "Total protein (g/L)"  ,
-    "Uric acid (umol/L)"  ,
-    "Direct bilirubin (umol/L)",  
-    "Gamma glutamyltransferase (U/L)",  
-    "Indirect bilirubin (umol/L)" ,
-    "Total bilirubin (umol/L)" ,
-    "Alkaline phosphatase (U/L)", 
-    "High density lipoprotein (mmol/L)" , 
-    "Low density lipoprotein (mmol/L)"  ,
-    "Lipase (U/L)",
-    "Total cholesterol (mmol/L)",  
-    "Triglycerides (mmol/L)"  
-)
+ 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
@@ -82,9 +55,9 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             div(("  
                            xxxxxxxxxxxxxxxxxx ")),
                             br(),
-                            selectInput("Plot",
-                                        strong("1. Select which biochemistry test to present"),
-                                        choices=biochemistry),
+                            # selectInput("Plot",
+                            #             strong("1. Select which biochemistry test to present"),
+                            #             choices=biochemistry),
 
                             selectInput("Plot1",
                                         strong("2. Select plot"),
@@ -104,19 +77,19 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                         min=2, max=500, step=1, value=600, ticks=FALSE),
                             
                             sliderInput("beta0", "Average intercept", 
-                                        min = 50, max = 2000, step=.5, value = c(10), ticks=FALSE) ,
+                                        min = -10, max = 10, step=0.5, value = c(10), ticks=FALSE) ,
                             
                             sliderInput("beta1", "Average slope",
-                                        min = -100, max = 100, step=.5, value = c(0),ticks=FALSE),
+                                        min = -5, max =5, step=.5, value = c(0),ticks=FALSE),
                             
                             sliderInput("sigma", "True error SD", #    
                                         min =.01, max = 10, value = c(.1), step=.1, ticks=FALSE),
                             
                             sliderInput("q", "True intercept SD", #   
-                                        min = 1, max = 100, value = c(25.5), step=.5, ticks=FALSE),
+                                        min = .1, max = 10, value = c(.5), step=.5, ticks=FALSE),
                             
                             sliderInput("s", "True slope SD", #    
-                                        min = 1, max = 100, value = c(10),step=.01,  ticks=FALSE),
+                                        min = .01, max = 10, value = c(.01),step=.01,  ticks=FALSE),
                             
                             sliderInput("r", "True intercept slope correlation", #   
                                         min = -1, max = 1, value = c(.9), step=0.05, ticks=FALSE),
@@ -171,7 +144,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("Plotting the data", 
                                      #    h2("Plotting the data"),
-                                    # div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
                                      
                                      h3(" "),
                                      
@@ -254,7 +227,7 @@ server <- shinyServer(function(input, output   ) {
         # Dummy line to trigger off button-press
         foo <-      input$resample
         
-        N <-    (input$N )
+        N <-     input$N
         beta0 <-  input$beta0 
         beta1 <-  input$beta1
         sigma <-  input$sigma
@@ -264,174 +237,119 @@ server <- shinyServer(function(input, output   ) {
         J <-  input$J
         time.ref <-  input$time.ref
         
-        return(list( N=N,  beta0=beta0,beta1=beta1, sigma=sigma, q=q, s=s, r=r, J=J, time.ref=time.ref )) 
+        return(list( N=N,  beta0=beta0, beta1=beta1, sigma=sigma, q=q, s=s, r=r, J=J, time.ref=time.ref )) 
   
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-      
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    })
+     })
     
     
     make.data <- reactive({
         
         sample <- random.sample()
         
-        is.even <- function(x){ x %% 2 == 0 }
+      
+        N        <-  600
+        beta0    <-  10
+        beta1    <-  0
+        sigma    <-  0.1
+        q        <-  .5 # standard deviations for the intercept 
+        s        <-  .01 # standard deviations for slope
+        r        <-  .05 # random effects correlation of slope internet
+        J        <-  8
+        time.ref <-  4
         
-        mdata <- function( n,beta0, beta1, beta2, ar.val, sigma, tau0, tau1, tau01, m ) {
-            
-            p <- round(runif(n,4,m))
-            obs <- unlist(sapply(p, function(x) c(1, sort(sample(2:m, x-1, replace=FALSE)))))
-            dat <- data.frame(id=rep(1:n, times=p), obs=obs)
-            dat$trt = 1*is.even(as.numeric(as.character(dat$id)))
-            dat$trt1 <- ifelse(dat$obs==1,  0, dat$trt) # new manipulate so trt effect after first visit 
-            mu  <- c(0,0)
-            S   <- matrix(c(1, tau01, tau01, 1), nrow=2)
-            tau <- c(tau0, tau1)
-            S   <- diag(tau) %*% S %*% diag(tau)
-            U   <- mvrnorm(n, mu=mu, Sigma=S)  # rows = patients
-            dat$eij <- unlist(sapply(p, function(x) arima.sim(model=list(ar=ar.val), n=x) * sqrt(1-ar.val^2) * sigma))
-            dat$yij <- (beta0 + rep(U[,1], times=p)) + (beta1 + rep(U[,2], times=p)) * (dat$obs) + dat$eij + beta2*dat$trt1 # beta2*dat$trt NEW
-            dat$trt1 <- NULL # new i want treatmetn effect after first visit
-            z <-  groupedData(yij ~ obs + trt | id, data=dat)   #TRT NEW
-            
-            return(z)
-            
-        }
+        N        <-  sample$N 
+        beta0    <-  sample$beta0 
+        beta1    <-  sample$beta1
+        sigma    <-  sample$sigma
+        q        <-  sample$q # standard deviations for the intercept 
+        s        <-  sample$s # standard deviations for slope
+        r        <-  sample$r # random effects correlation of slope internet
+        J        <-  sample$J
+        time.ref <-  sample$time.ref
         
-        i=input$V
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # set up patients and random treatment assignment
         
-        # beta1 = slope
-        # beta2 = tr effect
-        # trt <- c(-5,.4,-5,0,2,2,.1,.1,.1,.1,.1,.05,5,.5,.5,.1,1)
+        unit.df <- data.frame(unit = c(1:N), treat = sample(0:1,   N, replace=TRUE) )  
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-        z <- mdata(n=99,beta0=100, beta1=0, beta2=-5, ar.val=.9, sigma=5, tau0=7, tau1=1, tau01=0.01, m=i)
-        df1 <- cbind(test=biochemistry[1], z)
+        unit.df <-  within(unit.df, {
+            E.alpha.given.treat <-  intercept + trt  * treat      # trt is the true treatment effect
+            E.beta.given.treat  <-  slope + interaction * treat   # interaction effect
+        })
+     
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # covariance matrix for random effects
         
-        z <- mdata(n=85,beta0=5.6, beta1=0, beta2=-.04, ar.val=.9, sigma=.4, tau0=.2, tau1=.04, tau01=0.1, m=i)
-        df2 <- cbind(test=biochemistry[2], z)
+        cov.matrix <- matrix(c(q^2, r * q * s, r * q * s, s^2), nrow = 2, byrow = TRUE)
         
-        z <- mdata(n=102,beta0=110, beta1=0, beta2=-5, ar.val=.9, sigma=5, tau0=.5, tau1=.5, tau01=0.01, m=i)
-        df3 <- cbind(test=biochemistry[3], z)
+        random.effects <- rmvnorm(N, mean = c(0, 0), sigma = cov.matrix)
         
-        z <- mdata(n=102,beta0=2.4, beta1=.1, beta2=0, ar.val=.9, sigma=.2, tau0=.5, tau1=.01, tau01=0.2, m=i)
-        df4 <- cbind(test=biochemistry[4], z)
+        # add random effects
+        unit.df$alpha <- unit.df$E.alpha.given.treat + random.effects[, 1]
+        unit.df$beta <-  unit.df$E.beta.given.treat  + random.effects[, 2]
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # structure of experimental design
+        # time points
         
-        z <- mdata(n=90,beta0=104, beta1=1, beta2=2, ar.val=.8, sigma=4, tau0=5, tau1=1, tau01=.6, m=i)
-        df5 <- cbind(test=biochemistry[5], z)
+        #M = J * N  # Total number of observations  <- PROBLEM HERE
+        x.grid = seq(0, 8, by = 8/J)[0:8]
         
-        z <- mdata(n=90,beta0=95, beta1=0, beta2=2, ar.val=.8, sigma=4, tau0=15, tau1=1, tau01=.6, m=i)
-        df6 <- cbind(test=biochemistry[6], z)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # set up unbalanced visits everyone at first visit but randomly end up to max after that
         
-        z <- mdata(n=90,beta0=1.23, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df7 <- cbind(test=biochemistry[7], z)
+        p <- round(runif(N,2,J))                                                 # last visit for each person
         
-        z <- mdata(n=90,beta0=1, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df8 <- cbind(test=biochemistry[8], z)
+        M= sum(p)                                                                #  Total number of observations 
         
-        z <- mdata(n=99,beta0=4, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df9 <- cbind(test=biochemistry[9], z)
+        unit <- sort(rep(c(1:N), times=p))                                       # id for each person
         
-        z <- mdata(n=99,beta0=141, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df10 <- cbind(test=biochemistry[10], z)
+        j <- as.vector(unlist(tapply(X=unit, INDEX=list( unit), FUN=seq_along))) # count with each person
         
-        z <- mdata(n=111,beta0=44, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df11 <- cbind(test=biochemistry[11], z)
+        time <- j-1                                                              # first visit , baseline becomes 0
         
-        z <- mdata(n=88,beta0=5, beta1=0, beta2=.05, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df12 <- cbind(test=biochemistry[12], z)
+        within.unit.df <- data.frame(cbind(unit, j, time))                       # create a data frame
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end unbalanced
         
-        z <- mdata(n=112,beta0=70, beta1=0, beta2=.5, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df13 <- cbind(test=biochemistry[13], z)
+        # merge design and dataand create response
         
-        z <- mdata(n=112,beta0=72, beta1=0, beta2=.5, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df14 <- cbind(test=biochemistry[14], z)
+        flat.df = merge(unit.df, within.unit.df)
         
-        z <- mdata(n=97,beta0=3.4, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df15 <- cbind(test=biochemistry[15], z)
+        flat.df <-  within(flat.df, y <-  alpha + time * beta + error * rnorm(n = M))
         
-        z <- mdata(n=103,beta0=24, beta1=0, beta2=1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df16 <- cbind(test=biochemistry[16], z)
+        flat.df$treat <- as.factor(flat.df$treat)
+        flat.df$treat <- ifelse(flat.df$treat %in% 1, "Active","Placebo" )
         
-        z <- mdata(n=105,beta0=6, beta1=0, beta2=.5, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df18 <- cbind(test=biochemistry[18], z)
+        return(list(  flat.df = flat.df) )
         
-        z <- mdata(n=100,beta0=9, beta1=0, beta2=.0, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df19<- cbind(test=biochemistry[19], z)
-        
-        z <- mdata(n=103,beta0=64, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df20<- cbind(test=biochemistry[20], z)
-        
-        z <- mdata(n=97,beta0=1.3, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df21<- cbind(test=biochemistry[21], z)
-        
-        z <- mdata(n=98,beta0=3.3, beta1=0, beta2=-.2, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df22<- cbind(test=biochemistry[22], z)
-        
-        z <- mdata(n=104,beta0=34, beta1=0, beta2=.1, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df23<- cbind(test=biochemistry[23], z)
-        
-        z <- mdata(n=99,beta0=5.11, beta1=0, beta2=.0, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df24<- cbind(test=biochemistry[24], z)
-        
-        z <- mdata(n=100,beta0=1.23, beta1=0, beta2=.0, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df17<- cbind(test=biochemistry[17], z)
-        
-        z <- mdata(n=100,beta0=1.23, beta1=.1, beta2=.0, ar.val=.8, sigma=.1, tau0=.10, tau1=.01, tau01=.6, m=i)
-        df25<- cbind(test=biochemistry[25], z)
-        
-        
-        d1 <- do.call(rbind, list(df1 = df1, df2 = df2, df3=df3, df4=df4, df5=df5, df6=df6, df7=df7,
-                                  df8=df8,df9=df9,df10=df10,df11=df11,df12=df12,df13=df13,df14=df14,
-                                  df15=df15, df16=df16,df17=df17, df18=df18, df19=df19, df20=df20,
-                                  df21=df21,df22=df22, df23=df23, df24=df24, df25=df25))
-        
-        colnames(d1)[colnames(d1)=="yij"] <- "hillest"
-        colnames(d1)[colnames(d1)=="trt"] <- "tailindex"
-        colnames(d1)[colnames(d1)=="obs"] <- "memorypar"
-        colnames(d1)[colnames(d1)=="id"] <- "rep"
-        
-        d1$memorypar <- d1$memorypar - 1
-        d1$memorypar <- factor(d1$memorypar)
-        
-        d1$tailindex <- factor(d1$tailindex)
-        d1$tailindex <- ifelse(d1$tailindex %in% 1, "Active","Placebo" )
-        
-        return(list(  d1=d1)) 
-        
-    })
+    }) 
     
-    make.data2 <- reactive({
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    #---------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
+    # Plot the estimated trt effect  
+    
+    output$reg.plot1 <- renderPlot({         
         
-        sample <- random.sample()
         
-    })
+        flat.df <- make.data()$flat.df
+        
+        ggplot(flat.df,   aes (x = time, y = y, group = unit, color = treat)) +
+            geom_line() + geom_point() + ylab("response") + xlab("visit") +
+            stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+            # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+            # scale_shape_manual(values=c(3, 16))+ 
+            scale_color_manual(values=c('#999999','#E69F00'))+
+            theme(legend.position="top") +
+            xlim(0, J) +
+            scale_x_continuous(breaks=c(0:J)) 
+        
+    }) 
+    
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
@@ -533,68 +451,7 @@ server <- shinyServer(function(input, output   ) {
         
     })     
     
-    #---------------------------------------------------------------------------
-    #---------------------------------------------------------------------------
-    #---------------------------------------------------------------------------
-    # Plot the estimated trt effect  
-    
-    output$reg.plote <- renderPlot({         
-        
-        xl <- xlab( 'Follow up visit')
-        
-        f <- fit.regression()
-        
-        fit <- f$fit.res
-        
-        time. <-  rep(1:(input$V-1))
-        
-        k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
-                       list(time=time.,  trt = 'Active'))
-        
-        k1 <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
-        
-        mi <- floor(min(k1$Lower))
-        ma <- ceiling(max(k1$Upper))
-        
-        ggplot (k1, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
-            ylim(mi,ma) +
-            #   xlim(1, input$V-1) +
-            xlim(1, input$V) +
-            scale_x_continuous(breaks=c(time.)) +
-            #   ggpubr::grids(linetype = "dashed") +
-            
-            ylab( 'Placebo - Active')+ xl +
-            geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
-            ggtitle(paste0("Outcome measure ", input$Plot ,"; treatment effect estimate at each follow up visit with 95% CI")) +
-            geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
-            theme_bw() +
-            theme(legend.position="none") +
-            theme(#panel.background=element_blank(),
-                # axis.text.y=element_blank(),
-                # axis.ticks.y=element_blank(),
-                # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-                # stop axis being clipped
-                plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-                legend.text=element_text(size=14),
-                legend.title=element_text(size=14),
-                legend.position="none",
-                axis.text.x  = element_text(size=15),
-                axis.text.y  = element_text(size=15),
-                axis.line.x = element_line(color="black"),
-                axis.line.y = element_line(color="black"),
-                plot.caption=element_text(hjust = 0, size = 7),
-                strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-                axis.title.y = element_text(size = rel(1.5), angle = 90),
-                axis.title.x = element_text(size = rel(1.5), angle = 0),
-                panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
-                panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
-                strip.background = element_rect(colour = "black", fill = "#ececf0"),
-                panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-                plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
-            )
-        
-    }) 
-    
+  
     # --------------------------------------------------------------------------
     # -----------------------------------------------OVERALL PLOT
     # ---------------------------------------------------------------------------

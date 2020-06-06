@@ -51,7 +51,8 @@
   # structure of experimental design
   # time points
 
-  M = J * N  # Total number of observations
+ # M = J * N  # Total number of observations
+  #M= sum(p)
   x.grid = seq(0, 8, by = 8/J)[0:8]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,8 +62,12 @@
   #                               time = rep(x.grid, N))
 
  # set up unbalanced visits everyone at first visit but randomly end up to max after that
+  
+   
  
    p <- round(runif(N,2,J))            # last visit for each person
+   
+   M= sum(p)
   
    unit <- sort(rep(c(1:N), times=p))  # id for each person
   
