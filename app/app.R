@@ -12,6 +12,7 @@ library(MASS)
 require(tidyverse)
 library(shinyWidgets)
 library(lme4)
+library(DT)
 
 options(max.print=1000000)
 fig.width <- 1200
@@ -59,7 +60,11 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             actionButton("resample", "Simulate a new sample"),
                             br(), br(),
                             tags$style(".well {background-color:#b6aebd ;}"), 
-                            div(strong("Select the parameters using the sliders below"),p(" ")),
+                            
+                            div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below"))),
+                          
+                                
+                                p(" "),
                             
                             div(("  
                            xxxxxxxxxxxxxxxxxx ")),
@@ -81,7 +86,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
 
                             selectInput("Plot1",
                                         strong("2. Select plot"),
-                                        choices=c("Overall","Individual","Individual all tests")),
+                                        choices=c("Overall","Individual" )),
                             
                             
                             textInput('vec1', 
@@ -93,40 +98,47 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             
                             sliderInput("N",
-                                        "No of subjects",
+                                        div(h5(tags$span(style="color:blue", "total number of subjects"))),
                                         min=2, max=500, step=1, value=200, ticks=FALSE),
                             
-                            sliderInput("beta0", "Average intercept", 
-                                        min = -10, max = 10, step=0.5, value = c(10), ticks=FALSE) ,
-                            
-                            sliderInput("beta1", "Average slope",
-                                        min = -5, max =5, step=.5, value = c(0),ticks=FALSE),
-                            
-                            sliderInput("sigma", "True error SD", #    
-                                        min =.01, max = 10, value = c(.1), step=.1, ticks=FALSE),
-                            
-                            sliderInput("q", "True intercept SD", #   
-                                        min = .1, max = 10, value = c(.5), step=.5, ticks=FALSE),
-                            
-                            sliderInput("s", "True slope SD", #    
-                                        min = .01, max = 10, value = c(.01),step=.01,  ticks=FALSE),
-                            
-                            sliderInput("r", "True intercept slope correlation", #   
-                                        min = -1, max = 1, value = c(.9), step=0.05, ticks=FALSE),
-                            
-                            
-                            sliderInput("interaction", "Treatment time interaction", #   
-                                        min = -1, max = 1, value = c(-.2), step=.1, ticks=FALSE),
-                            
-                            sliderInput("trt.effect", "Treatment effect", #   
-                                        min = -10, max = 10, value = c(-1), step=1, ticks=FALSE),
-                            
-                           sliderInput("J",
-                                        strong("4. Maximum visit number in data simulation including baseline"),
+                            sliderInput("J",
+                                        div(h5(tags$span(style="color:blue", "Maximum visit in data simulation including baseline"))),
                                         min=3, max=10, step=1, value=8, ticks=FALSE),
                             
+                            sliderInput("trt.effect",
+                                        div(h5(tags$span(style="color:blue", "Treatment effect"))),
+                                        min = -10, max = 10, value = c(-1), step=1, ticks=FALSE),
+                            
+                            sliderInput("interaction",    
+                                        div(h5(tags$span(style="color:blue", "Treatment time interaction"))),
+                                        min = -1, max = 1, value = c(-.2), step=.1, ticks=FALSE),
+                            
+                            sliderInput("beta0", 
+                                        div(h5(tags$span(style="color:blue", "Average intercept"))),
+                                              min = -10, max = 10, step=0.5, value = c(10), ticks=FALSE) ,
+                            
+                            sliderInput("beta1", 
+                                        div(h5(tags$span(style="color:blue", "Average slope"))),
+                                        min = -5, max =5, step=.5, value = c(0),ticks=FALSE),
+                            
+                            sliderInput("q",   
+                                        div(h5(tags$span(style="color:blue", "True intercept SD"))),
+                                        min = .1, max = 10, value = c(.5), step=.5, ticks=FALSE),
+                            
+                            sliderInput("s",      
+                                        div(h5(tags$span(style="color:blue", "True slope SD"))),
+                                        min = .01, max = 10, value = c(.01),step=.01,  ticks=FALSE),
+                            
+                            sliderInput("r", 
+                                        div(h5(tags$span(style="color:blue", "True intercept slope correlation"))),
+                                        min = -1, max = 1, value = c(.9), step=0.05, ticks=FALSE),
+                            
+                            sliderInput("sigma",  
+                                        div(h5(tags$span(style="color:blue",  "True error SD"  ))),
+                                        min =.01, max = 10, value = c(.1), step=.1, ticks=FALSE),
+                            
                             sliderInput("time.ref",
-                                        strong( "5. Estimate treatment effect at this visit"),
+                                        div(h5(tags$span(style="color:blue", "Estimate treatment effect at this visit"))),
                                         min=1, max=10, step=1, value=4, ticks=FALSE),
                            
                            
@@ -241,6 +253,18 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            tabPanel("selecying patient", 
+                                     
+                                     div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
+                                   #  div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
+                                  #   div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
+                                     #  h4("Plot of the treatment effect estimates"),
+                                     #  h4("Plot of the treatment effect estimates"),
+                                     # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
+                                     # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
+                                     
+                                     
+                            ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Diagnostics",
@@ -257,7 +281,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("Data listing", value=3, 
                                      #  h4("Data listing"),
                                      h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
-                                    # DT::dataTableOutput("table1"),
+                                    DT::dataTableOutput("table1"),
                                      
                                      
                             ) 
@@ -307,17 +331,6 @@ server <- shinyServer(function(input, output   ) {
         
         sample <- random.sample()
         
-      
-        # N        <-  600
-        # beta0    <-  10
-        # beta1    <-  0
-        # sigma    <-  0.1
-        # q        <-  .5 # standard deviations for the intercept 
-        # s        <-  .01 # standard deviations for slope
-        # r        <-  .05 # random effects correlation of slope internet
-        # J        <-  8
-        # time.ref <-  4
-        
         N        <-  sample$N 
         intercept <-  sample$beta0 
         slope    <-  sample$beta1
@@ -327,9 +340,9 @@ server <- shinyServer(function(input, output   ) {
         r        <-  sample$r # random effects correlation of slope internet
         J        <-  sample$J
         time.ref <-  sample$time.ref
-        
         interaction<-  sample$interaction
         trt   <-  sample$trt
+        
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # set up patients and random treatment assignment
         
@@ -363,7 +376,7 @@ server <- shinyServer(function(input, output   ) {
         
         p <- round(runif(N,2,J))                                                 # last visit for each person
         
-        M= sum(p)                                                                #  Total number of observations 
+        M= sum(p)                                                                # Total number of observations 
         
         unit <- sort(rep(c(1:N), times=p))                                       # id for each person
         
@@ -603,7 +616,7 @@ server <- shinyServer(function(input, output   ) {
       ddz <<- datadist(tmp)  # need the double in rshiny environ <<
       options(datadist='ddz')
       
-      #j works but not time consecutive integer error?
+      #j works but not time consecutive integer error in gls?
       #table(tmp$j, tmp$time)
       #tmp$j <- as.factor(tmp$j )
       
@@ -993,337 +1006,201 @@ server <- shinyServer(function(input, output   ) {
     })  
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    # fit.regression <- reactive({
-    #     
-    #     d <- make.data()$d1
-    #     
-    #     target <- input$Plot
-    #     
-    #     d <- d[d$test %in% target,]
-    #     
-    #     d$time <- d$memorypar
-    #     
-    #     require(rms)
-    #     
-    #     d$time <- relevel(d$time, ref=input$VV)
-    #     
-    #     d$trt <- factor(d$tailindex) 
-    #     
-    #     d$yij <- d$hillest
-    #     
-    #     # new~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #     #convert time=1 to baseline var
-    #     d <- d[, c("test", "rep", "time", "trt", "yij")]
-    #     d$id=1:nrow(d)  # add index
-    #     baseline <- d[d$time %in% 0,] # create baseline removing baseline
-    #     names(baseline) <-  c("test", "rep", "time", "trt", "baseline", "id")
-    #     baseline$id <- NULL
-    #     baseline$time <- NULL
-    #     d2 <- d[!d$time ==0,]         # create follow up
-    #     both <- merge (baseline , d2   , all=TRUE)
-    #     both$rep <- as.numeric(as.character(both$rep))
-    #     both <- plyr::arrange(both, rep, time)
-    #     both$time <- as.numeric(as.character(both$time))
-    #     d <- both
-    #     d$time<-factor(d$time)
-    #     d$time <- relevel(d$time, ref=input$VV)
-    #     z<-d
-    #     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #     
-    #     ddz <<- datadist(d)  # need the double in this environ <<
-    #     
-    #     options(datadist='ddz')
-    #     
-    #     
-    #     fit.res <-  
-    #         tryCatch(Gls(yij  ~ baseline+ time * trt ,
-    #                      correlation=corSymm(form=~ as.numeric(time)|rep),
-    #                      weights=varIdent(form=~1|time),
-    #                      d, x=TRUE,
-    #                      na.action=na.exclude ), 
-    #                  error=function(e) e)
-    #     
-    #     return(list(fit.res=fit.res , target = target, z=z ))
-    # })     
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # treatment effect estimate
-    # output$reg.summary4 = DT::renderDataTable({
-    #     
-    #     f <- fit.regression()
-    #     
-    #     fit <- f$fit.res
-    #     
-    #     time. <- rep(1:(input$V-1))
-    #     
-    #     k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
-    #                    list(time=time.,  trt = 'Active'))
-    #     
-    #     
-    #     x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
-    #     
-    #     namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
-    #     
-    #     names(x) <- namez
-    #     
-    #     library(DT)
-    #     
-    #     #https://datatables.net/reference/option/
-    #     datatable(x,   
-    #               
-    #               rownames = FALSE,
-    #               
-    #               options = list(
-    #                   searching = FALSE,
-    #                   pageLength = input$V-1,
-    #                   paging=FALSE,
-    #                   lengthMenu = FALSE ,
-    #                   lengthChange = FALSE,
-    #                   autoWidth = TRUE
-    #                   # colReorder = TRUE,
-    #                   # deferRender = TRUE,
-    #                   # scrollY = 200,
-    #                   # scroller = T
-    #               ))  %>%
-    #         formatRound(
-    #             columns=c(namez), digits=c(0,2,2,2)  )
-    #     
-    #     
-    # })     
-    # 
-  
+
     # --------------------------------------------------------------------------
     # -----------------------------------------------OVERALL PLOT
     # ---------------------------------------------------------------------------
     
-    # output$reg.plot33 <- renderPlot({         
-    #     
-    #     d <- make.data()$d1
-    #     
-    #     if (input$Plot1 == "Overall") {
-    #         
-    #         target <- input$Plot
-    #         
-    #         d <- d[d$test %in% target,]
-    #         
-    #         # lets get counts to put in ribbons
-    #         d$tailindex <- factor(d$tailindex)
-    #         dx <- unique(d[,c("rep","tailindex")])
-    #         table(dx$tailindex)
-    #         n <- as.vector(table(dx$tailindex))
-    #         levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
-    #         
-    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #         pd <- position_dodge(.4)
-    #         pr1=NULL
-    #         pr1 <- ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex ))  + 
-    #             stat_boxplot(geom = "errorbar", width = 0.3) +
-    #             geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
-    #             geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
-    #             scale_size_manual( values = c( 1) ) +
-    #             geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
-    #             stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-    #                          position=pd, show.legend=FALSE) +
-    #             scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
-    #             scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
-    #             facet_wrap(~tailindex , ncol=2)    +
-    #             labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
-    #             
-    #             geom_text(data = d %>% group_by( memorypar, tailindex) %>%
-    #                           summarise(Count = n()) %>%
-    #                           ungroup %>%
-    #                           mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
-    #                       aes(label = paste0("n = ", Count)),
-    #                       position = pd, size=3, show.legend = FALSE) 
-    #         
-    #         
-    #         print(pr1 + labs(y=target, x = 'Visit (0 denotes the baseline visit)') +    
-    #                   ggtitle(paste0("There are N=",
-    #                                  length(unique(d$rep)),  
-    #                                  " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
-    #                   theme_bw() +
-    #                   theme(legend.position="none") +
-    #                   theme(#panel.background=element_blank(),
-    #                       # axis.text.y=element_blank(),
-    #                       # axis.ticks.y=element_blank(),
-    #                       # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-    #                       # stop axis being clipped
-    #                       plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-    #                       legend.text=element_text(size=14),
-    #                       legend.title=element_text(size=14),
-    #                       legend.position="none",
-    #                       axis.text.x  = element_text(size=15),
-    #                       axis.text.y  = element_text(size=15),
-    #                       axis.line.x = element_line(color="black"),
-    #                       axis.line.y = element_line(color="black"),
-    #                       plot.caption=element_text(hjust = 0, size = 11),
-    #                       strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-    #                       axis.title.y = element_text(size = rel(1.5), angle = 90),
-    #                       axis.title.x = element_text(size = rel(1.5), angle = 0),
-    #                       strip.background = element_rect(colour = "black", fill = "#ececf0"),
-    #                       panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-    #                       plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-    #                   ) 
-    #         )
-    #         
-    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
-    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #         
-    #     }  else  if (input$Plot1 == "Individual") { 
-    #         
-    #         
-    #         i <- as.numeric(unlist(strsplit(input$vec1,",")))
-    #         
-    #         target <- input$Plot
-    #         
-    #         d <- d[d$test %in% target,]
-    #         
-    #         d$tailindex <- factor(d$tailindex)
-    #         dx <- unique(d[,c("rep","tailindex")])
-    #         table(dx$tailindex)
-    #         n <- as.vector(table(dx$tailindex))
-    #         levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
-    #         #  if 999 is entered all subjects are shown
-    #         
-    #         if("999" %in% i) {
-    #             
-    #             dd<-d
-    #             
-    #         } else {
-    #             
-    #             dd <- d[d$rep %in% i,]
-    #         }
-    #         
-    #         sel <- unique(dd$tailindex) #if only one arm , dont show the empty arm
-    #         d <- d[d$tailindex %in% sel,]
-    #         
-    #         dx <- unique(dd[,c("rep","tailindex")])
-    #         
-    #         nn <- as.vector(table(dx$tailindex))
-    #         
-    #         levels(d$tailindex)  <- levels(dd$tailindex) <- 
-    #             c(paste0("Active N=",n[1], " with " ,nn[1]," patient profile(s) shown"), 
-    #               paste0("Placebo N=",n[2], " with " ,nn[2]," patient profile(s) shown"))
-    #         
-    #         
-    #         
-    #         pd <- position_dodge(.4)
-    #         pr1=NULL
-    #         pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
-    #             stat_boxplot(geom = "errorbar", width = 0.3) +
-    #             geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +  
-    #             geom_line(data = dd,
-    #                       aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
-    #             scale_size_manual( values = c( 1) ) +
-    #             geom_point(data=dd, aes(fill=tailindex, group=rep), 
-    #                        pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
-    #             geom_point(aes(fill=tailindex, group=rep), 
-    #                        pch=1, size=2, alpha=0.2, position = pd ) +
-    #             stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-    #                          position=pd, show.legend=FALSE) +
-    #             scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
-    #             scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
-    #             facet_wrap(~tailindex , ncol=2)    +
-    #             labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.")+
-    #             
-    #             geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
-    #                           summarise(Count = n()) %>%
-    #                           ungroup %>%
-    #                           mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
-    #                       aes(label = paste0("n = ", Count)),
-    #                       position = pd, size=5, show.legend = FALSE) 
-    #         
-    #         print(pr1 + labs(y=target, x = 'Visit (0 denotes the baseline visit)') + 
-    #                   
-    #                   ggtitle(paste0("There are N=",
-    #                                  length(unique(d$rep)),  
-    #                                  " patients with data at baseline, presenting selected patient profiles") ) +
-    #                   theme_bw() +
-    #                   theme(legend.position="none") +
-    #                   theme(#panel.background=element_blank(),
-    #                       # axis.text.y=element_blank(),
-    #                       # axis.ticks.y=element_blank(),
-    #                       # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-    #                       # stop axis being clipped
-    #                       plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-    #                       legend.text=element_text(size=14),
-    #                       legend.title=element_text(size=14),
-    #                       legend.position="none",
-    #                       axis.text.x  = element_text(size=15),
-    #                       axis.text.y  = element_text(size=15),
-    #                       axis.line.x = element_line(color="black"),
-    #                       axis.line.y = element_line(color="black"),
-    #                       plot.caption=element_text(hjust = 0, size = 11),
-    #                       strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-    #                       axis.title.y = element_text(size = rel(1.5), angle = 90),
-    #                       axis.title.x = element_text(size = rel(1.5), angle = 0),
-    #                       strip.background = element_rect(colour = "black", fill = "#ececf0"),
-    #                       panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-    #                       plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-    #                   ) 
-    #         )
-    #         
-    #     }   else  if (input$Plot1 ==  "Individual all tests") {
-    #         
-    #         
-    #         i <- as.numeric(unlist(strsplit(input$vec1,",")))
-    #         
-    #         
-    #         if(!isTruthy(input$vec1)){
-    #             
-    #             plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '')
-    #             title(toupper("The option '3. Select patient' is empty. Please enter a patient id in option 3 on the left, thank you!"), col.main = "red")
-    #             
-    #         } else  {  
-    #             
-    #             dd <- d[d$rep %in% i[1],]
-    #             
-    #             sel <- unique(dd$tailindex)  
-    #             
-    #             d <- dd[dd$tailindex %in% sel,]
-    #             
-    #             library(lattice)
-    #             
-    #             lattice.options(panel.error=NULL)
-    #             
-    #             colnames(d)[colnames(d) %in% "hillest"] <- "value"
-    #             
-    #             colnames(d)[colnames(d) %in% "memorypar"] <- "Visit"
-    #             
-    #             xy <<- xyplot(value ~ Visit | test,
-    #                           main=paste0( input$Plot ,"; all observed results for patient ", i[1]," allocated to ",sel,""), 
-    #                           par.settings=list(par.main.text=list(cex=2)),
-    #                           par.strip.text=list(cex=.7),
-    #                           group = test, data = d,
-    #                           xlab="Visit (0 denotes the baseline visit)",
-    #                           type = c("p" ,"l"),  scales = "free") 
-    #             
-    #             print(xy)
-    #             
-    #             
-    #         }
-    #         
-    #         
-    #     }
-    #     
-    #     
-    #     
-    #     
-    # })
+    output$reg.plot33 <- renderPlot({ 
+
+      tmp <- make.data2()$tmp
+      nbaseline <- make.data2()$nbaseline
+      all <- rbind(tmp, nbaseline)
+      d <- all  # add this to shown baslein
+      d$trt <- d$treat
+      d$rep <- d$unit
+      d$yij <- d$y
+      d$time <- factor(d$time)
+      
+        if (input$Plot1 == "Overall") {
+
+          #  target <- input$Plot
+
+          #  d <- d[d$test %in% target,]
+
+            # lets get counts to put in ribbons
+          d$trt <- factor(d$trt)
+          dx <- unique(d[,c("rep","trt")])
+          table(dx$trt)
+          n <- as.vector(table(dx$trt))
+          levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+          
+
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          pd <- position_dodge(.4)
+          pr1=NULL
+          pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
+            stat_boxplot(geom = "errorbar", width = 0.3) +
+            geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
+            geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
+            scale_size_manual( values = c( 1) ) +
+            geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+            stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+                         position=pd, show.legend=FALSE) +
+            scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
+            scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
+            facet_wrap(~trt , ncol=2)    +
+            labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
+            
+            geom_text(data = d %>% group_by( time, trt) %>%
+                        dplyr::summarise(Count = n()) %>%
+                        ungroup %>%
+                        mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
+                      aes(label = paste0("n = ", Count)),
+                      position = pd, size=3, show.legend = FALSE) 
+
+
+          print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
+                  ggtitle(paste0("There are N=",
+                                 length(unique(d$rep)),  
+                                 " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
+                  theme_bw() +
+                  theme(legend.position="none") +
+                  theme(#panel.background=element_blank(),
+                    # axis.text.y=element_blank(),
+                    # axis.ticks.y=element_blank(),
+                    # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                    # stop axis being clipped
+                    plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                    legend.text=element_text(size=14),
+                    legend.title=element_text(size=14),
+                    legend.position="none",
+                    axis.text.x  = element_text(size=15),
+                    axis.text.y  = element_text(size=15),
+                    axis.line.x = element_line(color="black"),
+                    axis.line.y = element_line(color="black"),
+                    plot.caption=element_text(hjust = 0, size = 11),
+                    strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                    axis.title.y = element_text(size = rel(1.5), angle = 90),
+                    axis.title.x = element_text(size = rel(1.5), angle = 0),
+                    strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                    panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                    plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+                  ) 
+          )
+
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        }  else  if (input$Plot1 == "Individual") {
+
+
+            i <- as.numeric(unlist(strsplit(input$vec1,",")))
+
+            # target <- input$Plot
+            # 
+            # d <- d[d$test %in% target,]
+
+            d$trt <- factor(d$trt)
+            dx <- unique(d[,c("rep","trt")])
+            table(dx$trt)
+            n <- as.vector(table(dx$trt))
+            levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+            
+            
+            #  if 999 is entered all subjects are shown
+
+            if("999" %in% i) {
+
+                dd<-d
+
+            } else {
+
+                dd <- d[d$rep %in% i,]
+            }
+
+            sel <- unique(dd$trt) #if only one arm , dont show the empty arm
+            d <- d[d$trt %in% sel,]
+
+            dx <- unique(dd[,c("rep","trt")])
+
+            nn <- as.vector(table(dx$trt))
+
+            levels(d$trt)  <- levels(dd$trt) <-
+                c(paste0("Active N=",n[1], " with " ,nn[1]," patient profile(s) shown"),
+                  paste0("Placebo N=",n[2], " with " ,nn[2]," patient profile(s) shown"))
+
+
+
+            pd <- position_dodge(.4)
+            pr1=NULL
+            pr1<-ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt )) +
+                stat_boxplot(geom = "errorbar", width = 0.3) +
+                geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +
+                geom_line(data = dd,
+                          aes(group=rep,x = time, y = yij),  size = .6, linetype="dashed") +
+                scale_size_manual( values = c( 1) ) +
+                geom_point(data=dd, aes(fill=trt, group=rep),
+                           pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
+                geom_point(aes(fill=trt, group=rep),
+                           pch=1, size=2, alpha=0.2, position = pd ) +
+                stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+                             position=pd, show.legend=FALSE) +
+                scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+                scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
+                facet_wrap(~trt , ncol=2)    +
+                labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.")+
+
+                geom_text(data = dd %>% group_by( time, trt) %>%
+                              summarise(Count = n()) %>%
+                              ungroup %>%
+                              mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
+                          aes(label = paste0("n = ", Count)),
+                          position = pd, size=5, show.legend = FALSE)
+
+            print(pr1 + labs(y="Response", x = 'Visit (0 denotes the baseline visit)') +
+
+                      ggtitle(paste0("There are N=",
+                                     length(unique(d$rep)),
+                                     " patients with data at baseline, presenting selected patient profiles") ) +
+                      theme_bw() +
+                      theme(legend.position="none") +
+                      theme(#panel.background=element_blank(),
+                          # axis.text.y=element_blank(),
+                          # axis.ticks.y=element_blank(),
+                          # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                          # stop axis being clipped
+                          plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                          legend.text=element_text(size=14),
+                          legend.title=element_text(size=14),
+                          legend.position="none",
+                          axis.text.x  = element_text(size=15),
+                          axis.text.y  = element_text(size=15),
+                          axis.line.x = element_line(color="black"),
+                          axis.line.y = element_line(color="black"),
+                          plot.caption=element_text(hjust = 0, size = 11),
+                          strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                          axis.title.y = element_text(size = rel(1.5), angle = 90),
+                          axis.title.x = element_text(size = rel(1.5), angle = 0),
+                          strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                          panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                          plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+                      )
+            )
+
+        }   
+
+
+            
+
+
+        
+
+
+
+
+    }) 
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1385,40 +1262,43 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # listing of simulated data
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # output$table1 <- DT::renderDataTable({
-    #     
-    #     foo<- make.data()$d1
-    #     
-    #     target <- input$Plot
-    #     
-    #     foo <- foo[foo$test %in% target,]
-    #     
-    #     foo$eij <- NULL 
-    #     
-    #     names(foo) <- c("Biochemistry test", "ID", "Visit", "Treatment","Response")
-    #     
-    #     rownames(foo) <- NULL
-    #     library(DT)
-    #     
-    #     datatable(foo,   
-    #               
-    #               rownames = TRUE,
-    #               
-    #               options = list(
-    #                   searching = TRUE,
-    #                   pageLength = input$V-1,
-    #                   paging=FALSE,
-    #                   lengthMenu = FALSE ,
-    #                   lengthChange = FALSE,
-    #                   autoWidth = FALSE
-    #                   # colReorder = TRUE,
-    #                   # deferRender = TRUE,
-    #                   # scrollY = 200,
-    #                   # scroller = T
-    #               ))  %>%
-    #         formatRound(
-    #             columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=c(0,0,0,0,4)  )
-    # })
+    output$table1 <- DT::renderDataTable({
+
+        foo<- make.data2()$d
+         
+        foo$time <- relevel(foo$time , ref=1)
+        
+        foo <- plyr::arrange(foo, unit, time)
+
+        names(foo) <- c("Patient","Baseline", "Treatment", "Visit","Response", "Country")
+
+        rownames(foo) <- NULL
+        
+
+          datatable(foo,
+
+                  rownames = TRUE,
+
+                  options = list(
+                      searching = TRUE,
+                      pageLength = 16,
+                      paging=TRUE,
+                      lengthMenu = FALSE ,
+                      lengthChange = FALSE,
+                      autoWidth = FALSE
+                       #colReorder = TRUE,
+                    #  deferRender = TRUE
+                      #scrollY = 600,
+                     # scroller = T
+                  )) %>%
+    
+            formatRound(
+               columns= c("Baseline", "Response"), 
+                digits=4 )
+        
+      
+        
+    })
     # 
     # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # # summary stats
