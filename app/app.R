@@ -1,6 +1,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Rshiny ideas from on https://gallery.shinyapps.io/multi_regression/
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(list=ls())
 set.seed(2345)
 library(mvtnorm) 
 library(rms)
@@ -10,6 +11,7 @@ library(nlme)
 library(MASS)
 require(tidyverse)
 library(shinyWidgets)
+library(lme4)
 
 options(max.print=1000000)
 fig.width <- 1200
@@ -94,6 +96,13 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             sliderInput("r", "True intercept slope correlation", #   
                                         min = -1, max = 1, value = c(.9), step=0.05, ticks=FALSE),
                             
+                            
+                            sliderInput("interaction", "Treatment time interaction", #   
+                                        min = -1, max = 1, value = c(-.2), step=.1, ticks=FALSE),
+                            
+                            sliderInput("trt.effect", "Treatment effect", #   
+                                        min = -10, max = 10, value = c(-1), step=1, ticks=FALSE),
+                            
                            sliderInput("J",
                                         strong("4. Maximum visit number in data simulation including baseline"),
                                         min=3, max=10, step=1, value=8, ticks=FALSE),
@@ -101,6 +110,13 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             sliderInput("time.ref",
                                         strong( "5. Estimate treatment effect at this visit"),
                                         min=1, max=10, step=1, value=4, ticks=FALSE),
+                           
+                           
+                           
+                           
+                           
+                           
+                           
                   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             
                  
@@ -147,7 +163,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
                                      
                                      h3(" "),
-                                     
+                                     div(class="span7", verbatimTextOutput("reg.summary")),
                                      p(strong(
                                          "xxxxxxxxxxx")) ,
                                      
@@ -235,9 +251,14 @@ server <- shinyServer(function(input, output   ) {
         s <-  input$s
         r <-  input$r
         J <-  input$J
+        trt <- input$trt.effect 
+        interaction = input$interaction
+        
         time.ref <-  input$time.ref
         
-        return(list( N=N,  beta0=beta0, beta1=beta1, sigma=sigma, q=q, s=s, r=r, J=J, time.ref=time.ref )) 
+        return(list( N=N,  beta0=beta0, beta1=beta1, sigma=sigma, q=q, s=s, r=r, J=J, time.ref=time.ref ,
+                     interaction=interaction, trt=trt
+                     )) 
   
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -269,6 +290,8 @@ server <- shinyServer(function(input, output   ) {
         J        <-  sample$J
         time.ref <-  sample$time.ref
         
+        interaction<-  sample$interaction
+        trt   <-  sample$trt
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # set up patients and random treatment assignment
         
@@ -349,6 +372,46 @@ server <- shinyServer(function(input, output   ) {
             scale_x_continuous(breaks=c(0:J)) 
         
     }) 
+    
+    
+    fit.regression0 <- reactive({
+        
+        flat.df <- make.data()$flat.df
+        
+        my.lmer <-  lmer(y ~    time * treat + (1 + time | unit), data = flat.df)
+
+        return(list(fit.res= summary(my.lmer) ))
+        
+    })     
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # model output
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    output$reg.summary <- renderPrint({
+        
+        summary <- fit.regression0()$fit.res
+        
+        return(list(summary))
+        
+    })  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -813,9 +876,9 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # model output
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    output$reg.summary2 <- renderPrint({
+    output$reg.summary <- renderPrint({
         
-        summary <- fit.regression()$fit.res
+        summary <- fit.regression0()$fit.res
         
         return(list(summary))
         
