@@ -270,19 +270,19 @@ server <- shinyServer(function(input, output   ) {
         sample <- random.sample()
         
       
-        N        <-  600
-        beta0    <-  10
-        beta1    <-  0
-        sigma    <-  0.1
-        q        <-  .5 # standard deviations for the intercept 
-        s        <-  .01 # standard deviations for slope
-        r        <-  .05 # random effects correlation of slope internet
-        J        <-  8
-        time.ref <-  4
+        # N        <-  600
+        # beta0    <-  10
+        # beta1    <-  0
+        # sigma    <-  0.1
+        # q        <-  .5 # standard deviations for the intercept 
+        # s        <-  .01 # standard deviations for slope
+        # r        <-  .05 # random effects correlation of slope internet
+        # J        <-  8
+        # time.ref <-  4
         
         N        <-  sample$N 
-        beta0    <-  sample$beta0 
-        beta1    <-  sample$beta1
+        intercept <-  sample$beta0 
+        slope    <-  sample$beta1
         sigma    <-  sample$sigma
         q        <-  sample$q # standard deviations for the intercept 
         s        <-  sample$s # standard deviations for slope
