@@ -1,32 +1,32 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Rshiny ideas from on https://gallery.shinyapps.io/multi_regression/
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(list=ls())
-set.seed(2345)
-library(mvtnorm) 
-library(rms)
-library(ggplot2)
-library(shiny) 
-library(nlme)
-library(MASS)
-require(tidyverse)
-library(shinyWidgets)
-library(lme4)
-library(DT)
-
-options(max.print=1000000)
-fig.width <- 1200
-fig.height <- 550
-fig.height2 <- 450
-library(shinythemes)        # more funky looking apps
-p1 <- function(x) {formatC(x, format="f", digits=1)}
-p2 <- function(x) {formatC(x, format="f", digits=2)}
-options(width=100)
- 
-
-# function to create longitudinal data
-
-is.even <- function(x){ x %% 2 == 0 }
+  rm(list=ls())
+  set.seed(2345)
+  library(mvtnorm) 
+  library(rms)
+  library(ggplot2)
+  library(shiny) 
+  library(nlme)
+  library(MASS)
+  require(tidyverse)
+  library(shinyWidgets)
+  library(lme4)
+  library(DT)
+  
+  options(max.print=1000000)
+  fig.width <- 1200
+  fig.height <- 550
+  fig.height2 <- 450
+  library(shinythemes)        # more funky looking apps
+  p1 <- function(x) {formatC(x, format="f", digits=1)}
+  p2 <- function(x) {formatC(x, format="f", digits=2)}
+  options(width=100)
+   
+  
+  # function to create longitudinal data
+  
+  is.even <- function(x){ x %% 2 == 0 }
 
  
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,7 +39,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                     gradient = "linear",
                     direction = "bottom"
                 ),
-                h3("Simulating and analysing longitudianal data and estimating a treatment effect "),
+                h3("Simulating longitudinal data analysing and estimating a treatment effect"),
                 shinyUI(pageWithSidebar(
                     headerPanel(" "),
                     
@@ -85,13 +85,14 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             #             choices=biochemistry),
 
                             selectInput("Plot1",
-                                        strong("2. Select plot"),
+                                        div(h5(tags$span(style="color:blue", "Select plot"))),
                                         choices=c("Overall","Individual" )),
                             
                             
                             textInput('vec1', 
-                                      strong("3. Select patient. If '2 select plot' 'Individual' is selected, enter sample ID(s) (comma delimited); 
-                                      enter 999 to show all profiles; If 'Individual all tests' is selected, all test results for the first ID only are presented"), "1,2,3,4"),
+                                      div(h5(tags$span(style="color:blue", "Select patient. If '2 select plot' 'Individual' is selected, enter sample ID(s) (comma delimited); 
+                                      enter 999 to show all profiles; If 'Individual all tests' is selected, all test results for the first ID only are presented"))),
+                                       "1,2,3,4"),
                             
                             
                             
@@ -326,6 +327,9 @@ server <- shinyServer(function(input, output   ) {
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      })
     
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    #  start creating data
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     
     make.data <- reactive({
         
@@ -365,10 +369,8 @@ server <- shinyServer(function(input, output   ) {
         unit.df$alpha <- unit.df$E.alpha.given.treat + random.effects[, 1]
         unit.df$beta <-  unit.df$E.beta.given.treat  + random.effects[, 2]
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # structure of experimental design
-        # time points
-        
-        #M = J * N  # Total number of observations  <- PROBLEM HERE
+        # structure of experimental design and time points
+ 
         x.grid = seq(0, 8, by = 8/J)[0:8]
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -390,9 +392,7 @@ server <- shinyServer(function(input, output   ) {
         # merge design and dataand create response
         
         flat.df = merge(unit.df, within.unit.df)
-        
         flat.df <-  within(flat.df, y <-  alpha + time * beta + error * rnorm(n = M))
-        
         flat.df$treat <- as.factor(flat.df$treat)
         flat.df$treat <- ifelse(flat.df$treat %in% 1, "Active","Placebo" )
         
@@ -401,41 +401,28 @@ server <- shinyServer(function(input, output   ) {
     }) 
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
     # creating baseline variable, I want treatment effect to start after baseline,
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     make.data2 <- reactive({
       
       sample <- random.sample()
-  
-      
+
       N        <-  sample$N 
-      
       flat.df        <- make.data()$flat.df
       random.effects <- make.data()$random.effects
-       p <- make.data()$p
-      
-      #
+      p <- make.data()$p
+
       nbaseline <- flat.df[(flat.df$time !=0),]  
-      
-      # ggplot(nbaseline, aes(x=time,y=y,colour=treat)) +  
-      #   geom_line(data =nbaseline, aes(x=time, y=y, group=unit) ) +
-      #   theme_bw() +
-      #   theme(legend.position="none") 
-      
-      
-      # my.lmer <- NULL
-      # my.lmer <-  lmer(y ~    time * treat + (1 + time | unit), data = nbaseline)
-      # summary(my.lmer)
       
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # all observations that are baseline
       baseline <- flat.df[(flat.df$time ==0),]  
-      # overwrite so no treatment effect manifestas a baseline
+      # overwrite so no treatment effect manifests at baseline
       baseline$alpha <- intercept + random.effects[, 1]
       baseline$beta <-  slope     + random.effects[, 2]
       
-      # use tmp for a plot
+      # use tmp later for a plot
       tmp <- baseline <- within(baseline, y <-  alpha + 0 * beta + error * rnorm(n = N) )
       
       baseline <- baseline[,c("unit","y"   )] 
@@ -450,28 +437,22 @@ server <- shinyServer(function(input, output   ) {
       d$time <- relevel(d$time, ref=time.ref)
       
       # just put in random countries so no association
-      
       #d$country <-  factor(sort(rep(sample(1:8 ),   N, times=J-1)))   # balanced
       d$country <- factor(rep(sample(1:8 , N, replace=T), times=p-1))  # unbalanced
       
-  return(list( d=d , tmp=tmp, nbaseline=nbaseline) )
+      return(list( d=d , tmp=tmp, nbaseline=nbaseline) )
       
     }) 
-    
-    
-    
-    
+ 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+    # run lmer and gls (and get contrasts) on the data were treatment effect starts after time 0
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     fit.regression.base<- reactive({
       
       d<- make.data2()$d
       
       my.lmer <-  lmer(y ~  country + baseline * treat + time * treat + (1 + as.numeric(time) | unit), data = d)
-    #  summary(my.lmer)
-      
-     # require(rms)
       
       ddz <<- datadist(d)  # need the double in this environ <<
       options(datadist='ddz')
@@ -504,9 +485,10 @@ server <- shinyServer(function(input, output   ) {
 
       return(list( fit.lmer= summary(my.lmer) , fit.res=fit.res , x=x))
       
-    })     
+    })   
     
-    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     output$reg.summaryb1 <- renderPrint({
       
       summary <- fit.regression.base()$fit.res
@@ -514,6 +496,7 @@ server <- shinyServer(function(input, output   ) {
       return(list(summary))
       
     })  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     output$reg.summaryb2 <- renderPrint({
       
@@ -522,6 +505,7 @@ server <- shinyServer(function(input, output   ) {
       return(list(summary))
       
     })  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     output$reg.summaryb3 <- renderPrint({
       
@@ -530,34 +514,14 @@ server <- shinyServer(function(input, output   ) {
       return(list(summary))
       
     })  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-    #---------------------------------------------------------------------------
-    #---------------------------------------------------------------------------
-    #---------------------------------------------------------------------------
-    # Plot the estimated trt effect 
-    
+  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # spaghetti plot of the data in which trt effect starts at baseline 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     output$reg.plot1 <- renderPlot({         
-        
         
         flat.df <- make.data()$flat.df
         
@@ -573,6 +537,9 @@ server <- shinyServer(function(input, output   ) {
         
     }) 
     
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # fit lmer regression on the data in which trt effect starts at baseline
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     fit.regression0 <- reactive({
         
@@ -584,9 +551,9 @@ server <- shinyServer(function(input, output   ) {
         
     })     
     
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # model output
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     output$reg.summary <- renderPrint({
         
         summary <- fit.regression0()$fit.res
@@ -596,7 +563,9 @@ server <- shinyServer(function(input, output   ) {
     })  
     
     
-    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # fit gls regression on the data in which trt effect starts at baseline and get contrasts over time
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     fit.regression.gls0 <- reactive({
       
@@ -647,9 +616,10 @@ server <- shinyServer(function(input, output   ) {
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # plot of treatment effect for data at which trt effect starts at baseline
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     output$reg.plot2 <- renderPlot({         
-      
       
       k1a <-  fit.regression.gls0()$k1a
        
@@ -706,8 +676,10 @@ server <- shinyServer(function(input, output   ) {
     }) 
     
     
-    
-    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # boxplots of data at which trt effect starts at baseline
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     output$reg.plot3 <- renderPlot({         
       
       flat.df <- make.data()$flat.df
@@ -782,9 +754,11 @@ server <- shinyServer(function(input, output   ) {
       
       
       
-      
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # plot of treatment effect for data at which trt effect starts after baseline
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
       output$reg.plot2b <- renderPlot({         
-        
         
         k1a <- fit.regression.base()$x
         fit <- fit.regression.base()$fit.res
@@ -845,11 +819,11 @@ server <- shinyServer(function(input, output   ) {
       }) 
       
       
-      
-      
-      
-      
-      output$reg.plot3b <- renderPlot({         
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # spaghetti plot of the data in which trt effect starts after baseline 
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+          output$reg.plot3b <- renderPlot({         
         
         
         tmp <- make.data2()$tmp
@@ -858,8 +832,6 @@ server <- shinyServer(function(input, output   ) {
         all <- rbind(tmp, nbaseline)
         
         all$time <- as.numeric(as.character(all$time ))
-        
-        
         
         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
           geom_line() + geom_point() + ylab("response") + xlab("visit") +
@@ -876,7 +848,10 @@ server <- shinyServer(function(input, output   ) {
       
       
       
-      
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # boxplots of data at which trt effect starts after baseline 
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+          
       output$reg.plot4b <- renderPlot({         
         
         
@@ -952,44 +927,10 @@ server <- shinyServer(function(input, output   ) {
                   plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
                 ) 
         )
-        
-        
-        
-        
-        
-        
-        
-        
-        
+    
       }) 
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-   
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-    
-    
-    
-    
-    output$reg.summary1 <- renderPrint({
+   output$reg.summary1 <- renderPrint({
       
       summary <- fit.regression.gls0()$fit.res
       
@@ -1006,7 +947,10 @@ server <- shinyServer(function(input, output   ) {
     })  
     
     
-
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # boxplots of data at which trt effect starts after baseline allwing highlighting of selected patients
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     # --------------------------------------------------------------------------
     # -----------------------------------------------OVERALL PLOT
     # ---------------------------------------------------------------------------
@@ -1024,11 +968,8 @@ server <- shinyServer(function(input, output   ) {
       
         if (input$Plot1 == "Overall") {
 
-          #  target <- input$Plot
-
-          #  d <- d[d$test %in% target,]
-
-            # lets get counts to put in ribbons
+        
+         # lets get counts to put in ribbons
           d$trt <- factor(d$trt)
           dx <- unique(d[,c("rep","trt")])
           table(dx$trt)
@@ -1097,10 +1038,6 @@ server <- shinyServer(function(input, output   ) {
 
 
             i <- as.numeric(unlist(strsplit(input$vec1,",")))
-
-            # target <- input$Plot
-            # 
-            # d <- d[d$test %in% target,]
 
             d$trt <- factor(d$trt)
             dx <- unique(d[,c("rep","trt")])
@@ -1191,24 +1128,19 @@ server <- shinyServer(function(input, output   ) {
 
         }   
 
-
-            
-
-
-        
-
-
-
-
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # end of boxplots of data at which trt effect starts after baseline allwing highlighting of selected patients
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
     }) 
     
     
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # diagnostics
-    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Diagnostics using data at which trt effect starts after baseline
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
    output$res.diag  <- renderPlot({
 
-       
        fit <- fit.regression.base()$fit.res
 
        d<- make.data2()$d
