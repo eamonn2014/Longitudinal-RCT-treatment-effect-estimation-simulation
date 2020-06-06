@@ -216,6 +216,10 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Plot of the treatment effect estimates", 
+                                     
+                                     div(class="span7", verbatimTextOutput("reg.summaryb1")),
+                                     div(class="span7", verbatimTextOutput("reg.summaryb2")),
+                                     div(class="span7", verbatimTextOutput("reg.summaryb3")),
                                      #  h4("Plot of the treatment effect estimates"),
                                     # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
                                     # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
@@ -367,9 +371,158 @@ server <- shinyServer(function(input, output   ) {
         flat.df$treat <- as.factor(flat.df$treat)
         flat.df$treat <- ifelse(flat.df$treat %in% 1, "Active","Placebo" )
         
-        return(list(  flat.df = flat.df) )
+        return(list(  flat.df = flat.df,  random.effects= random.effects, p=p) )
         
     }) 
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    # creating baseline variable, I want treatment effect to start after baseline,
+    
+    make.data2 <- reactive({
+      
+      sample <- random.sample()
+  
+      
+      N        <-  sample$N 
+      
+      flat.df        <- make.data()$flat.df
+      random.effects <- make.data()$random.effects
+       p <- make.data()$p
+      
+      #
+      nbaseline <- flat.df[(flat.df$time !=0),]  
+      
+      # ggplot(nbaseline, aes(x=time,y=y,colour=treat)) +  
+      #   geom_line(data =nbaseline, aes(x=time, y=y, group=unit) ) +
+      #   theme_bw() +
+      #   theme(legend.position="none") 
+      
+      
+      # my.lmer <- NULL
+      # my.lmer <-  lmer(y ~    time * treat + (1 + time | unit), data = nbaseline)
+      # summary(my.lmer)
+      
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # all observations that are baseline
+      baseline <- flat.df[(flat.df$time ==0),]  
+      # overwrite so no treatment effect manifestas a baseline
+      baseline$alpha <- intercept + random.effects[, 1]
+      baseline$beta <-  slope     + random.effects[, 2]
+      
+      # use tmp for a plot
+      tmp <- baseline <- within(baseline, y <-  alpha + 0 * beta + error * rnorm(n = N) )
+      
+      baseline <- baseline[,c("unit","y"   )] 
+      names(baseline) <- c("unit","baseline"  )  # rename y to baseline
+      
+      # merge baseline and no baseline
+      both <- merge (baseline , nbaseline  , all=TRUE)
+      
+      d <-  both[, c("unit", "baseline", "treat", "time", "y")]
+      d$time<-factor(d$time)
+      d$treat<-factor(d$treat)
+      d$time <- relevel(d$time, ref=time.ref)
+      
+      # just put in random countries so no association
+      
+      #d$country <-  factor(sort(rep(sample(1:8 ),   N, times=J-1)))   # balanced
+      d$country <- factor(rep(sample(1:8 , N, replace=T), times=p-1))  # unbalanced
+      
+  return(list( d=d) )
+      
+    }) 
+    
+    
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    
+    fit.regression.base<- reactive({
+      
+      d<- make.data2()$d
+      
+      my.lmer <-  lmer(y ~  country + baseline * treat + time * treat + (1 + as.numeric(time) | unit), data = d)
+    #  summary(my.lmer)
+      
+     # require(rms)
+      
+      ddz <<- datadist(d)  # need the double in this environ <<
+      options(datadist='ddz')
+      
+      
+      (fit.res <-  
+          tryCatch(Gls(y  ~ country + baseline * treat + time * treat ,
+                       correlation=corSymm(form = ~as.numeric(time) | unit) ,
+                       weights=varIdent(form=~1|time),
+                       d, x=TRUE,
+                       na.action=na.exclude ),  
+                   error=function(e) e)
+      ) 
+      
+      J <-  input$J
+      time. <- rep(1:(J-1))
+      
+      # k1 <- contrast(fit, list(time=time.,  treat = "Placebo", baseline=median(d$baseline)),
+      #                list(time=time.,  treat =  "Active", baseline=median(d$baseline)))
+      # 
+      # match model output
+      k1 <- contrast(fit.res, list(time=time.,  treat = "Placebo", baseline=0, country=1),
+                              list(time=time.,  treat =  "Active", baseline=0, country=1))
+      
+      x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
+      
+      namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
+      
+      names(x) <- namez
+
+      return(list( fit.lmer= summary(my.lmer) , fit.res=fit.res , x=x))
+      
+    })     
+    
+    
+    output$reg.summaryb1 <- renderPrint({
+      
+      summary <- fit.regression.base()$fit.res
+      
+      return(list(summary))
+      
+    })  
+    
+    output$reg.summaryb2 <- renderPrint({
+      
+      summary <- fit.regression.base()$fit.lmer
+      
+      return(list(summary))
+      
+    })  
+    
+    output$reg.summaryb3 <- renderPrint({
+      
+      summary <- fit.regression.base()$x
+      
+      return(list(summary))
+      
+    })  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
