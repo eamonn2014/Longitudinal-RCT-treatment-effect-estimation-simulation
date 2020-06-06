@@ -227,6 +227,17 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            tabPanel("Plot of the treatment effect estimates2", 
+                                     
+                                     div(plotOutput("reg.plot2b", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
+                                     #  h4("Plot of the treatment effect estimates"),
+                                     #  h4("Plot of the treatment effect estimates"),
+                                     # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
+                                     # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
+                                     
+                                     
+                            ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             
@@ -429,7 +440,7 @@ server <- shinyServer(function(input, output   ) {
       #d$country <-  factor(sort(rep(sample(1:8 ),   N, times=J-1)))   # balanced
       d$country <- factor(rep(sample(1:8 , N, replace=T), times=p-1))  # unbalanced
       
-  return(list( d=d) )
+  return(list( d=d , tmp=tmp, nbaseline=nbaseline) )
       
     }) 
     
@@ -529,7 +540,7 @@ server <- shinyServer(function(input, output   ) {
     #---------------------------------------------------------------------------
     #---------------------------------------------------------------------------
     #---------------------------------------------------------------------------
-    # Plot the estimated trt effect  
+    # Plot the estimated trt effect 
     
     output$reg.plot1 <- renderPlot({         
         
@@ -606,7 +617,8 @@ server <- shinyServer(function(input, output   ) {
       
       fit <-  fit.res
       
-      time. <- rep(1:(J))
+      J <-  input$J
+       time. <- rep(1:(J))
       
       k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
                            list(j=time.,  treat = "Placebo" ))
@@ -748,6 +760,119 @@ server <- shinyServer(function(input, output   ) {
               ) 
       )
       #   input$Plot
+      
+      
+      
+      
+      
+      
+      output$reg.plot2b <- renderPlot({         
+        
+        
+        k1a <- fit.regression.base()$x
+        fit <- fit.regression.base()$fit.res
+        J <-  input$J
+        time. <- rep(1:(J-1))
+      
+        
+        k1a <- contrast(fit, list(time=time.,  treat = 'Placebo'),
+                             list(time=time.,  treat = 'Active'))
+        
+        k1a <- as.data.frame(k1a[c(3,4,6,7)])
+        
+        mi <- floor(min(k1a$Lower))
+        ma <- ceiling(max(k1a$Upper))
+        
+        names(k1a) <- (c( "Time",'Contrast', 'Lower', 'Upper'))
+        
+        k1 <- as.data.frame(k1a)
+        
+        xl <- xlab( 'Follow up visit (baseline not shown)')
+        
+        ggplot (k1, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
+          ylim(mi,ma) +
+          #   xlim(1, input$V-1) +
+          xlim(1, J) +
+          scale_x_continuous(breaks=c(time.)) +
+          
+          ylab( 'Placebo - Active')+ xl +
+          geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
+          ggtitle(paste0("Outcome measure "," \ntreatment effect estimate at each visit with 95% CI")) +
+          geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
+          theme_bw() +
+          theme(legend.position="none") +
+          theme(#panel.background=element_blank(),
+            # axis.text.y=element_blank(),
+            # axis.ticks.y=element_blank(),
+            # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+            # stop axis being clipped
+            plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+            legend.text=element_text(size=14),
+            legend.title=element_text(size=14),
+            legend.position="none",
+            axis.text.x  = element_text(size=15),
+            axis.text.y  = element_text(size=15),
+            axis.line.x = element_line(color="black"),
+            axis.line.y = element_line(color="black"),
+            plot.caption=element_text(hjust = 0, size = 7),
+            strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+            axis.title.y = element_text(size = rel(1.5), angle = 90),
+            axis.title.x = element_text(size = rel(1.5), angle = 0),
+            panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
+            panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
+            strip.background = element_rect(colour = "black", fill = "#ececf0"),
+            panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+            plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
+          )
+        
+        
+        
+        
+        
+        
+        
+        
+      }) 
+      
+      
+      
+      
+      
+      
+      output$reg.plot3b <- renderPlot({         
+        
+        
+        tmp <- make.data2()$tmp
+        nbaseline <- make.data2()$nbaseline
+      
+        all <- rbind(tmp, nbaseline)
+        
+        all$time <- as.numeric(as.character(all$time ))
+        
+        
+        
+        ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+          # scale_shape_manual(values=c(3, 16))+ 
+          scale_color_manual(values=c('#999999','#E69F00'))+
+          theme(legend.position="top") +
+          xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) 
+        
+        
+        
+        
+        
+        
+      }) 
+      
+      
+      
+      
+      
+      
       
       
       

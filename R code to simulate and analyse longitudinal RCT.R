@@ -528,10 +528,39 @@ ggplot(d, aes(x=time,y=y,colour=treat)) +
 all <- rbind(tmp, nbaseline)
 
 all$time <- as.numeric(as.character(all$time ))
+
 ggplot(all, aes(x=time,y=y,colour=treat)) +  
   geom_line(data =all, aes(x=time, y=y, group=unit) ) +
   theme_bw() +
   theme(legend.position="none") 
+
+# improve the above plot
+
+ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+  geom_line() + geom_point() + ylab("response") + xlab("visit") +
+  stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+  # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+  # scale_shape_manual(values=c(3, 16))+ 
+  scale_color_manual(values=c('#999999','#E69F00'))+
+  theme(legend.position="top") +
+  xlim(0, J) +
+  scale_x_continuous(breaks=c(0:J)) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  #####################################################################################################
 
