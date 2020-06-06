@@ -592,18 +592,19 @@ server <- shinyServer(function(input, output   ) {
       time.ref <-  input$time.ref
       
       tmp <- flat.df
+      
       tmp$j <- factor(tmp$j)
       tmp$j <- relevel(tmp$j, ref=time.ref)
 
-      table(tmp$j, tmp$time)
+      #table(tmp$j, tmp$time)
       tmp$j <- as.factor(tmp$j )
       
       ddz <<- datadist(tmp)  # need the double in rshiny environ <<
       options(datadist='ddz')
       
       #j works but not time consecutive integer error?
-      table(tmp$j, tmp$time)
-      tmp$j <- as.factor(tmp$j )
+      #table(tmp$j, tmp$time)
+      #tmp$j <- as.factor(tmp$j )
       
       fit.res <- NULL
       (fit.res <-
@@ -615,15 +616,15 @@ server <- shinyServer(function(input, output   ) {
                    error=function(e) e)
       )
       
-      fit <-  fit.res
+     fit <-  fit.res
       
       J <-  input$J
        time. <- rep(1:(J))
       
       k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
-                           list(j=time.,  treat = "Placebo" ))
+                                list(j=time.,  treat = "Placebo" ))
       
-      k1a
+      #k1a
       
       
       return(list(fit.res= fit.res , k1a=k1a ))
@@ -631,13 +632,15 @@ server <- shinyServer(function(input, output   ) {
     })     
     
     
-    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     output$reg.plot2 <- renderPlot({         
       
       
-      k1a <-  fit.regression.gls0 ()$k1a
+      k1a <-  fit.regression.gls0()$k1a
        
+      J <-  input$J
+      time. <- rep(1:(J))
       k1a <- as.data.frame(k1a[c(1,2,4,5)])
       
       mi <- floor(min(k1a$Lower))
@@ -761,7 +764,7 @@ server <- shinyServer(function(input, output   ) {
       )
       #   input$Plot
       
-      
+   })
       
       
       
@@ -825,13 +828,6 @@ server <- shinyServer(function(input, output   ) {
             plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
           )
         
-        
-        
-        
-        
-        
-        
-        
       }) 
       
       
@@ -861,11 +857,7 @@ server <- shinyServer(function(input, output   ) {
           xlim(0, J) +
           scale_x_continuous(breaks=c(0:J)) 
         
-        
-        
-        
-        
-        
+    
       }) 
       
       
@@ -884,7 +876,7 @@ server <- shinyServer(function(input, output   ) {
       
       
       
-    }) 
+   # }) 
     
     
     
@@ -920,482 +912,482 @@ server <- shinyServer(function(input, output   ) {
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    fit.regression <- reactive({
-        
-        d <- make.data()$d1
-        
-        target <- input$Plot
-        
-        d <- d[d$test %in% target,]
-        
-        d$time <- d$memorypar
-        
-        require(rms)
-        
-        d$time <- relevel(d$time, ref=input$VV)
-        
-        d$trt <- factor(d$tailindex) 
-        
-        d$yij <- d$hillest
-        
-        # new~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #convert time=1 to baseline var
-        d <- d[, c("test", "rep", "time", "trt", "yij")]
-        d$id=1:nrow(d)  # add index
-        baseline <- d[d$time %in% 0,] # create baseline removing baseline
-        names(baseline) <-  c("test", "rep", "time", "trt", "baseline", "id")
-        baseline$id <- NULL
-        baseline$time <- NULL
-        d2 <- d[!d$time ==0,]         # create follow up
-        both <- merge (baseline , d2   , all=TRUE)
-        both$rep <- as.numeric(as.character(both$rep))
-        both <- plyr::arrange(both, rep, time)
-        both$time <- as.numeric(as.character(both$time))
-        d <- both
-        d$time<-factor(d$time)
-        d$time <- relevel(d$time, ref=input$VV)
-        z<-d
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        ddz <<- datadist(d)  # need the double in this environ <<
-        
-        options(datadist='ddz')
-        
-        
-        fit.res <-  
-            tryCatch(Gls(yij  ~ baseline+ time * trt ,
-                         correlation=corSymm(form=~ as.numeric(time)|rep),
-                         weights=varIdent(form=~1|time),
-                         d, x=TRUE,
-                         na.action=na.exclude ), 
-                     error=function(e) e)
-        
-        return(list(fit.res=fit.res , target = target, z=z ))
-    })     
+    # fit.regression <- reactive({
+    #     
+    #     d <- make.data()$d1
+    #     
+    #     target <- input$Plot
+    #     
+    #     d <- d[d$test %in% target,]
+    #     
+    #     d$time <- d$memorypar
+    #     
+    #     require(rms)
+    #     
+    #     d$time <- relevel(d$time, ref=input$VV)
+    #     
+    #     d$trt <- factor(d$tailindex) 
+    #     
+    #     d$yij <- d$hillest
+    #     
+    #     # new~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #     #convert time=1 to baseline var
+    #     d <- d[, c("test", "rep", "time", "trt", "yij")]
+    #     d$id=1:nrow(d)  # add index
+    #     baseline <- d[d$time %in% 0,] # create baseline removing baseline
+    #     names(baseline) <-  c("test", "rep", "time", "trt", "baseline", "id")
+    #     baseline$id <- NULL
+    #     baseline$time <- NULL
+    #     d2 <- d[!d$time ==0,]         # create follow up
+    #     both <- merge (baseline , d2   , all=TRUE)
+    #     both$rep <- as.numeric(as.character(both$rep))
+    #     both <- plyr::arrange(both, rep, time)
+    #     both$time <- as.numeric(as.character(both$time))
+    #     d <- both
+    #     d$time<-factor(d$time)
+    #     d$time <- relevel(d$time, ref=input$VV)
+    #     z<-d
+    #     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #     
+    #     ddz <<- datadist(d)  # need the double in this environ <<
+    #     
+    #     options(datadist='ddz')
+    #     
+    #     
+    #     fit.res <-  
+    #         tryCatch(Gls(yij  ~ baseline+ time * trt ,
+    #                      correlation=corSymm(form=~ as.numeric(time)|rep),
+    #                      weights=varIdent(form=~1|time),
+    #                      d, x=TRUE,
+    #                      na.action=na.exclude ), 
+    #                  error=function(e) e)
+    #     
+    #     return(list(fit.res=fit.res , target = target, z=z ))
+    # })     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # treatment effect estimate
-    output$reg.summary4 = DT::renderDataTable({
-        
-        f <- fit.regression()
-        
-        fit <- f$fit.res
-        
-        time. <- rep(1:(input$V-1))
-        
-        k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
-                       list(time=time.,  trt = 'Active'))
-        
-        
-        x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
-        
-        namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
-        
-        names(x) <- namez
-        
-        library(DT)
-        
-        #https://datatables.net/reference/option/
-        datatable(x,   
-                  
-                  rownames = FALSE,
-                  
-                  options = list(
-                      searching = FALSE,
-                      pageLength = input$V-1,
-                      paging=FALSE,
-                      lengthMenu = FALSE ,
-                      lengthChange = FALSE,
-                      autoWidth = TRUE
-                      # colReorder = TRUE,
-                      # deferRender = TRUE,
-                      # scrollY = 200,
-                      # scroller = T
-                  ))  %>%
-            formatRound(
-                columns=c(namez), digits=c(0,2,2,2)  )
-        
-        
-    })     
-    
+    # output$reg.summary4 = DT::renderDataTable({
+    #     
+    #     f <- fit.regression()
+    #     
+    #     fit <- f$fit.res
+    #     
+    #     time. <- rep(1:(input$V-1))
+    #     
+    #     k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
+    #                    list(time=time.,  trt = 'Active'))
+    #     
+    #     
+    #     x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
+    #     
+    #     namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
+    #     
+    #     names(x) <- namez
+    #     
+    #     library(DT)
+    #     
+    #     #https://datatables.net/reference/option/
+    #     datatable(x,   
+    #               
+    #               rownames = FALSE,
+    #               
+    #               options = list(
+    #                   searching = FALSE,
+    #                   pageLength = input$V-1,
+    #                   paging=FALSE,
+    #                   lengthMenu = FALSE ,
+    #                   lengthChange = FALSE,
+    #                   autoWidth = TRUE
+    #                   # colReorder = TRUE,
+    #                   # deferRender = TRUE,
+    #                   # scrollY = 200,
+    #                   # scroller = T
+    #               ))  %>%
+    #         formatRound(
+    #             columns=c(namez), digits=c(0,2,2,2)  )
+    #     
+    #     
+    # })     
+    # 
   
     # --------------------------------------------------------------------------
     # -----------------------------------------------OVERALL PLOT
     # ---------------------------------------------------------------------------
     
-    output$reg.plot33 <- renderPlot({         
-        
-        d <- make.data()$d1
-        
-        if (input$Plot1 == "Overall") {
-            
-            target <- input$Plot
-            
-            d <- d[d$test %in% target,]
-            
-            # lets get counts to put in ribbons
-            d$tailindex <- factor(d$tailindex)
-            dx <- unique(d[,c("rep","tailindex")])
-            table(dx$tailindex)
-            n <- as.vector(table(dx$tailindex))
-            levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
-            
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            pd <- position_dodge(.4)
-            pr1=NULL
-            pr1 <- ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex ))  + 
-                stat_boxplot(geom = "errorbar", width = 0.3) +
-                geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
-                geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
-                scale_size_manual( values = c( 1) ) +
-                geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
-                stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-                             position=pd, show.legend=FALSE) +
-                scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
-                scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
-                facet_wrap(~tailindex , ncol=2)    +
-                labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
-                
-                geom_text(data = d %>% group_by( memorypar, tailindex) %>%
-                              summarise(Count = n()) %>%
-                              ungroup %>%
-                              mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
-                          aes(label = paste0("n = ", Count)),
-                          position = pd, size=3, show.legend = FALSE) 
-            
-            
-            print(pr1 + labs(y=target, x = 'Visit (0 denotes the baseline visit)') +    
-                      ggtitle(paste0("There are N=",
-                                     length(unique(d$rep)),  
-                                     " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
-                      theme_bw() +
-                      theme(legend.position="none") +
-                      theme(#panel.background=element_blank(),
-                          # axis.text.y=element_blank(),
-                          # axis.ticks.y=element_blank(),
-                          # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-                          # stop axis being clipped
-                          plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-                          legend.text=element_text(size=14),
-                          legend.title=element_text(size=14),
-                          legend.position="none",
-                          axis.text.x  = element_text(size=15),
-                          axis.text.y  = element_text(size=15),
-                          axis.line.x = element_line(color="black"),
-                          axis.line.y = element_line(color="black"),
-                          plot.caption=element_text(hjust = 0, size = 11),
-                          strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-                          axis.title.y = element_text(size = rel(1.5), angle = 90),
-                          axis.title.x = element_text(size = rel(1.5), angle = 0),
-                          strip.background = element_rect(colour = "black", fill = "#ececf0"),
-                          panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-                          plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-                      ) 
-            )
-            
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            
-        }  else  if (input$Plot1 == "Individual") { 
-            
-            
-            i <- as.numeric(unlist(strsplit(input$vec1,",")))
-            
-            target <- input$Plot
-            
-            d <- d[d$test %in% target,]
-            
-            d$tailindex <- factor(d$tailindex)
-            dx <- unique(d[,c("rep","tailindex")])
-            table(dx$tailindex)
-            n <- as.vector(table(dx$tailindex))
-            levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
-            #  if 999 is entered all subjects are shown
-            
-            if("999" %in% i) {
-                
-                dd<-d
-                
-            } else {
-                
-                dd <- d[d$rep %in% i,]
-            }
-            
-            sel <- unique(dd$tailindex) #if only one arm , dont show the empty arm
-            d <- d[d$tailindex %in% sel,]
-            
-            dx <- unique(dd[,c("rep","tailindex")])
-            
-            nn <- as.vector(table(dx$tailindex))
-            
-            levels(d$tailindex)  <- levels(dd$tailindex) <- 
-                c(paste0("Active N=",n[1], " with " ,nn[1]," patient profile(s) shown"), 
-                  paste0("Placebo N=",n[2], " with " ,nn[2]," patient profile(s) shown"))
-            
-            
-            
-            pd <- position_dodge(.4)
-            pr1=NULL
-            pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
-                stat_boxplot(geom = "errorbar", width = 0.3) +
-                geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +  
-                geom_line(data = dd,
-                          aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
-                scale_size_manual( values = c( 1) ) +
-                geom_point(data=dd, aes(fill=tailindex, group=rep), 
-                           pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
-                geom_point(aes(fill=tailindex, group=rep), 
-                           pch=1, size=2, alpha=0.2, position = pd ) +
-                stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-                             position=pd, show.legend=FALSE) +
-                scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
-                scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
-                facet_wrap(~tailindex , ncol=2)    +
-                labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.")+
-                
-                geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
-                              summarise(Count = n()) %>%
-                              ungroup %>%
-                              mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
-                          aes(label = paste0("n = ", Count)),
-                          position = pd, size=5, show.legend = FALSE) 
-            
-            print(pr1 + labs(y=target, x = 'Visit (0 denotes the baseline visit)') + 
-                      
-                      ggtitle(paste0("There are N=",
-                                     length(unique(d$rep)),  
-                                     " patients with data at baseline, presenting selected patient profiles") ) +
-                      theme_bw() +
-                      theme(legend.position="none") +
-                      theme(#panel.background=element_blank(),
-                          # axis.text.y=element_blank(),
-                          # axis.ticks.y=element_blank(),
-                          # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-                          # stop axis being clipped
-                          plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-                          legend.text=element_text(size=14),
-                          legend.title=element_text(size=14),
-                          legend.position="none",
-                          axis.text.x  = element_text(size=15),
-                          axis.text.y  = element_text(size=15),
-                          axis.line.x = element_line(color="black"),
-                          axis.line.y = element_line(color="black"),
-                          plot.caption=element_text(hjust = 0, size = 11),
-                          strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-                          axis.title.y = element_text(size = rel(1.5), angle = 90),
-                          axis.title.x = element_text(size = rel(1.5), angle = 0),
-                          strip.background = element_rect(colour = "black", fill = "#ececf0"),
-                          panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-                          plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-                      ) 
-            )
-            
-        }   else  if (input$Plot1 ==  "Individual all tests") {
-            
-            
-            i <- as.numeric(unlist(strsplit(input$vec1,",")))
-            
-            
-            if(!isTruthy(input$vec1)){
-                
-                plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '')
-                title(toupper("The option '3. Select patient' is empty. Please enter a patient id in option 3 on the left, thank you!"), col.main = "red")
-                
-            } else  {  
-                
-                dd <- d[d$rep %in% i[1],]
-                
-                sel <- unique(dd$tailindex)  
-                
-                d <- dd[dd$tailindex %in% sel,]
-                
-                library(lattice)
-                
-                lattice.options(panel.error=NULL)
-                
-                colnames(d)[colnames(d) %in% "hillest"] <- "value"
-                
-                colnames(d)[colnames(d) %in% "memorypar"] <- "Visit"
-                
-                xy <<- xyplot(value ~ Visit | test,
-                              main=paste0( input$Plot ,"; all observed results for patient ", i[1]," allocated to ",sel,""), 
-                              par.settings=list(par.main.text=list(cex=2)),
-                              par.strip.text=list(cex=.7),
-                              group = test, data = d,
-                              xlab="Visit (0 denotes the baseline visit)",
-                              type = c("p" ,"l"),  scales = "free") 
-                
-                print(xy)
-                
-                
-            }
-            
-            
-        }
-        
-        
-        
-        
-    })
+    # output$reg.plot33 <- renderPlot({         
+    #     
+    #     d <- make.data()$d1
+    #     
+    #     if (input$Plot1 == "Overall") {
+    #         
+    #         target <- input$Plot
+    #         
+    #         d <- d[d$test %in% target,]
+    #         
+    #         # lets get counts to put in ribbons
+    #         d$tailindex <- factor(d$tailindex)
+    #         dx <- unique(d[,c("rep","tailindex")])
+    #         table(dx$tailindex)
+    #         n <- as.vector(table(dx$tailindex))
+    #         levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+    #         
+    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #         pd <- position_dodge(.4)
+    #         pr1=NULL
+    #         pr1 <- ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex ))  + 
+    #             stat_boxplot(geom = "errorbar", width = 0.3) +
+    #             geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
+    #             geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
+    #             scale_size_manual( values = c( 1) ) +
+    #             geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+    #             stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+    #                          position=pd, show.legend=FALSE) +
+    #             scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
+    #             scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
+    #             facet_wrap(~tailindex , ncol=2)    +
+    #             labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
+    #             
+    #             geom_text(data = d %>% group_by( memorypar, tailindex) %>%
+    #                           summarise(Count = n()) %>%
+    #                           ungroup %>%
+    #                           mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
+    #                       aes(label = paste0("n = ", Count)),
+    #                       position = pd, size=3, show.legend = FALSE) 
+    #         
+    #         
+    #         print(pr1 + labs(y=target, x = 'Visit (0 denotes the baseline visit)') +    
+    #                   ggtitle(paste0("There are N=",
+    #                                  length(unique(d$rep)),  
+    #                                  " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
+    #                   theme_bw() +
+    #                   theme(legend.position="none") +
+    #                   theme(#panel.background=element_blank(),
+    #                       # axis.text.y=element_blank(),
+    #                       # axis.ticks.y=element_blank(),
+    #                       # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+    #                       # stop axis being clipped
+    #                       plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+    #                       legend.text=element_text(size=14),
+    #                       legend.title=element_text(size=14),
+    #                       legend.position="none",
+    #                       axis.text.x  = element_text(size=15),
+    #                       axis.text.y  = element_text(size=15),
+    #                       axis.line.x = element_line(color="black"),
+    #                       axis.line.y = element_line(color="black"),
+    #                       plot.caption=element_text(hjust = 0, size = 11),
+    #                       strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+    #                       axis.title.y = element_text(size = rel(1.5), angle = 90),
+    #                       axis.title.x = element_text(size = rel(1.5), angle = 0),
+    #                       strip.background = element_rect(colour = "black", fill = "#ececf0"),
+    #                       panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+    #                       plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+    #                   ) 
+    #         )
+    #         
+    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
+    #         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #         
+    #     }  else  if (input$Plot1 == "Individual") { 
+    #         
+    #         
+    #         i <- as.numeric(unlist(strsplit(input$vec1,",")))
+    #         
+    #         target <- input$Plot
+    #         
+    #         d <- d[d$test %in% target,]
+    #         
+    #         d$tailindex <- factor(d$tailindex)
+    #         dx <- unique(d[,c("rep","tailindex")])
+    #         table(dx$tailindex)
+    #         n <- as.vector(table(dx$tailindex))
+    #         levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+    #         #  if 999 is entered all subjects are shown
+    #         
+    #         if("999" %in% i) {
+    #             
+    #             dd<-d
+    #             
+    #         } else {
+    #             
+    #             dd <- d[d$rep %in% i,]
+    #         }
+    #         
+    #         sel <- unique(dd$tailindex) #if only one arm , dont show the empty arm
+    #         d <- d[d$tailindex %in% sel,]
+    #         
+    #         dx <- unique(dd[,c("rep","tailindex")])
+    #         
+    #         nn <- as.vector(table(dx$tailindex))
+    #         
+    #         levels(d$tailindex)  <- levels(dd$tailindex) <- 
+    #             c(paste0("Active N=",n[1], " with " ,nn[1]," patient profile(s) shown"), 
+    #               paste0("Placebo N=",n[2], " with " ,nn[2]," patient profile(s) shown"))
+    #         
+    #         
+    #         
+    #         pd <- position_dodge(.4)
+    #         pr1=NULL
+    #         pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
+    #             stat_boxplot(geom = "errorbar", width = 0.3) +
+    #             geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +  
+    #             geom_line(data = dd,
+    #                       aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
+    #             scale_size_manual( values = c( 1) ) +
+    #             geom_point(data=dd, aes(fill=tailindex, group=rep), 
+    #                        pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
+    #             geom_point(aes(fill=tailindex, group=rep), 
+    #                        pch=1, size=2, alpha=0.2, position = pd ) +
+    #             stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+    #                          position=pd, show.legend=FALSE) +
+    #             scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+    #             scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
+    #             facet_wrap(~tailindex , ncol=2)    +
+    #             labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.")+
+    #             
+    #             geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
+    #                           summarise(Count = n()) %>%
+    #                           ungroup %>%
+    #                           mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
+    #                       aes(label = paste0("n = ", Count)),
+    #                       position = pd, size=5, show.legend = FALSE) 
+    #         
+    #         print(pr1 + labs(y=target, x = 'Visit (0 denotes the baseline visit)') + 
+    #                   
+    #                   ggtitle(paste0("There are N=",
+    #                                  length(unique(d$rep)),  
+    #                                  " patients with data at baseline, presenting selected patient profiles") ) +
+    #                   theme_bw() +
+    #                   theme(legend.position="none") +
+    #                   theme(#panel.background=element_blank(),
+    #                       # axis.text.y=element_blank(),
+    #                       # axis.ticks.y=element_blank(),
+    #                       # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+    #                       # stop axis being clipped
+    #                       plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+    #                       legend.text=element_text(size=14),
+    #                       legend.title=element_text(size=14),
+    #                       legend.position="none",
+    #                       axis.text.x  = element_text(size=15),
+    #                       axis.text.y  = element_text(size=15),
+    #                       axis.line.x = element_line(color="black"),
+    #                       axis.line.y = element_line(color="black"),
+    #                       plot.caption=element_text(hjust = 0, size = 11),
+    #                       strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+    #                       axis.title.y = element_text(size = rel(1.5), angle = 90),
+    #                       axis.title.x = element_text(size = rel(1.5), angle = 0),
+    #                       strip.background = element_rect(colour = "black", fill = "#ececf0"),
+    #                       panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+    #                       plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+    #                   ) 
+    #         )
+    #         
+    #     }   else  if (input$Plot1 ==  "Individual all tests") {
+    #         
+    #         
+    #         i <- as.numeric(unlist(strsplit(input$vec1,",")))
+    #         
+    #         
+    #         if(!isTruthy(input$vec1)){
+    #             
+    #             plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '')
+    #             title(toupper("The option '3. Select patient' is empty. Please enter a patient id in option 3 on the left, thank you!"), col.main = "red")
+    #             
+    #         } else  {  
+    #             
+    #             dd <- d[d$rep %in% i[1],]
+    #             
+    #             sel <- unique(dd$tailindex)  
+    #             
+    #             d <- dd[dd$tailindex %in% sel,]
+    #             
+    #             library(lattice)
+    #             
+    #             lattice.options(panel.error=NULL)
+    #             
+    #             colnames(d)[colnames(d) %in% "hillest"] <- "value"
+    #             
+    #             colnames(d)[colnames(d) %in% "memorypar"] <- "Visit"
+    #             
+    #             xy <<- xyplot(value ~ Visit | test,
+    #                           main=paste0( input$Plot ,"; all observed results for patient ", i[1]," allocated to ",sel,""), 
+    #                           par.settings=list(par.main.text=list(cex=2)),
+    #                           par.strip.text=list(cex=.7),
+    #                           group = test, data = d,
+    #                           xlab="Visit (0 denotes the baseline visit)",
+    #                           type = c("p" ,"l"),  scales = "free") 
+    #             
+    #             print(xy)
+    #             
+    #             
+    #         }
+    #         
+    #         
+    #     }
+    #     
+    #     
+    #     
+    #     
+    # })
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # diagnostics
     
-    output$res.plot  <- renderPlot({       
-        
-        f <- fit.regression()
-        fit <- f$fit.res
-        
-        d <- f$z
-        
-        target <- input$Plot
-        d <- d[d$test %in% target,]
-        d2 <- d
-        
-        d2$resid <- r <- resid(fit)
-        
-        d2$fitted <- fitted(fit)
-        
-        yl <- ylab('Residuals') 
-        
-        xl <- xlab("time")
-        
-        p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point (   colour="#69b3a2") + yl 
-        
-        p3 <- ggplot(d2 , aes(x=time , y=resid )) +  geom_point ( colour="#69b3a2") + yl  + xl +
-            stat_summary(fun.data ="mean_sdl", geom='smooth') 
-        
-        p4 <- ggplot(d2 , aes(sample=resid )) + stat_qq(colour="#69b3a2") +
-            geom_abline(intercept=mean(r), slope=sd(r)  ,  colour="black") + 
-            xlab('Residuals')   +
-            ggtitle( " ")  
-        
-        # p5 <- d2 %>%
-        #   ggplot( aes(x=r)) +
-        #   geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1, 
-        #  theme(
-        #     plot.title = element_text(size=15)
-        #   ) 
-        library(gridExtra)
-        library(grid)
-        df <- data.frame(Residuals = r)
-        p5 <- ggplot(df, aes(x = Residuals)) + 
-            geom_histogram(aes(y =..density..),
-                           #breaks = seq(-50, 50, by = 2), 
-                           colour = "black", 
-                           fill = "#69b3a2") +
-            stat_function(fun = dnorm, args = list(mean = 0, sd = sigma(fit)  ))
-        
-        grid.arrange(p1,  p3, p4,p5, ncol=2,
-                     
-                     top = textGrob(paste0(input$Plot, " GLS model fit diagnostics"),gp=gpar(fontsize=20,font=3)))
-        #+
-        #main=paste0(input$Plot, "GLS model fit diagnostics")  #
-        
-    })
+    # output$res.plot  <- renderPlot({       
+    #     
+    #     f <- fit.regression()
+    #     fit <- f$fit.res
+    #     
+    #     d <- f$z
+    #     
+    #     target <- input$Plot
+    #     d <- d[d$test %in% target,]
+    #     d2 <- d
+    #     
+    #     d2$resid <- r <- resid(fit)
+    #     
+    #     d2$fitted <- fitted(fit)
+    #     
+    #     yl <- ylab('Residuals') 
+    #     
+    #     xl <- xlab("time")
+    #     
+    #     p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point (   colour="#69b3a2") + yl 
+    #     
+    #     p3 <- ggplot(d2 , aes(x=time , y=resid )) +  geom_point ( colour="#69b3a2") + yl  + xl +
+    #         stat_summary(fun.data ="mean_sdl", geom='smooth') 
+    #     
+    #     p4 <- ggplot(d2 , aes(sample=resid )) + stat_qq(colour="#69b3a2") +
+    #         geom_abline(intercept=mean(r), slope=sd(r)  ,  colour="black") + 
+    #         xlab('Residuals')   +
+    #         ggtitle( " ")  
+    #     
+    #     # p5 <- d2 %>%
+    #     #   ggplot( aes(x=r)) +
+    #     #   geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1, 
+    #     #  theme(
+    #     #     plot.title = element_text(size=15)
+    #     #   ) 
+    #     library(gridExtra)
+    #     library(grid)
+    #     df <- data.frame(Residuals = r)
+    #     p5 <- ggplot(df, aes(x = Residuals)) + 
+    #         geom_histogram(aes(y =..density..),
+    #                        #breaks = seq(-50, 50, by = 2), 
+    #                        colour = "black", 
+    #                        fill = "#69b3a2") +
+    #         stat_function(fun = dnorm, args = list(mean = 0, sd = sigma(fit)  ))
+    #     
+    #     grid.arrange(p1,  p3, p4,p5, ncol=2,
+    #                  
+    #                  top = textGrob(paste0(input$Plot, " GLS model fit diagnostics"),gp=gpar(fontsize=20,font=3)))
+    #     #+
+    #     #main=paste0(input$Plot, "GLS model fit diagnostics")  #
+    #     
+   # })
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # listing of simulated data
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    output$table1 <- DT::renderDataTable({
-        
-        foo<- make.data()$d1
-        
-        target <- input$Plot
-        
-        foo <- foo[foo$test %in% target,]
-        
-        foo$eij <- NULL 
-        
-        names(foo) <- c("Biochemistry test", "ID", "Visit", "Treatment","Response")
-        
-        rownames(foo) <- NULL
-        library(DT)
-        
-        datatable(foo,   
-                  
-                  rownames = TRUE,
-                  
-                  options = list(
-                      searching = TRUE,
-                      pageLength = input$V-1,
-                      paging=FALSE,
-                      lengthMenu = FALSE ,
-                      lengthChange = FALSE,
-                      autoWidth = FALSE
-                      # colReorder = TRUE,
-                      # deferRender = TRUE,
-                      # scrollY = 200,
-                      # scroller = T
-                  ))  %>%
-            formatRound(
-                columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=c(0,0,0,0,4)  )
-    })
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # summary stats
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    
-    output$table2 = DT::renderDataTable({
-        
-        foo<- make.data()$d1
-        
-        target <- input$Plot
-        
-        foo <- foo[foo$test %in% target,]
-        
-        f<-plyr::ddply(foo, c("test", "memorypar","tailindex"), summarise,
-                       min=min(hillest),mean = mean(hillest), sd = sd(hillest, na.rm=TRUE),
-                       sem = sd(hillest)/sqrt(length(hillest)),  Q1=quantile(hillest, 0.25)    , 
-                       median=median(hillest),   Q3=quantile(hillest, 0.75)  , max=max(hillest)  )
-        
-        names(f) <- c("Biochemistry test",  "Visit", "Treatment","Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum")
-        
-        rownames(f) <- NULL
-        
-        
-        library(DT)
-        datatable(f,   
-                  rownames = TRUE,
-                  options = list(
-                      searching = TRUE,
-                      pageLength = input$V-1,
-                      paging=FALSE,
-                      lengthMenu = FALSE ,
-                      lengthChange = FALSE,
-                      autoWidth = FALSE
-                      # colReorder = TRUE,
-                      # deferRender = TRUE,
-                      # scrollY = 200,
-                      # scroller = T
-                  ))  %>%
-            formatRound(
-                columns= c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=c(2)  )
-        
-        
-    })
+    # output$table1 <- DT::renderDataTable({
+    #     
+    #     foo<- make.data()$d1
+    #     
+    #     target <- input$Plot
+    #     
+    #     foo <- foo[foo$test %in% target,]
+    #     
+    #     foo$eij <- NULL 
+    #     
+    #     names(foo) <- c("Biochemistry test", "ID", "Visit", "Treatment","Response")
+    #     
+    #     rownames(foo) <- NULL
+    #     library(DT)
+    #     
+    #     datatable(foo,   
+    #               
+    #               rownames = TRUE,
+    #               
+    #               options = list(
+    #                   searching = TRUE,
+    #                   pageLength = input$V-1,
+    #                   paging=FALSE,
+    #                   lengthMenu = FALSE ,
+    #                   lengthChange = FALSE,
+    #                   autoWidth = FALSE
+    #                   # colReorder = TRUE,
+    #                   # deferRender = TRUE,
+    #                   # scrollY = 200,
+    #                   # scroller = T
+    #               ))  %>%
+    #         formatRound(
+    #             columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=c(0,0,0,0,4)  )
+    # })
+    # 
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # # summary stats
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # 
+    # output$table2 = DT::renderDataTable({
+    #     
+    #     foo<- make.data()$d1
+    #     
+    #     target <- input$Plot
+    #     
+    #     foo <- foo[foo$test %in% target,]
+    #     
+    #     f<-plyr::ddply(foo, c("test", "memorypar","tailindex"), summarise,
+    #                    min=min(hillest),mean = mean(hillest), sd = sd(hillest, na.rm=TRUE),
+    #                    sem = sd(hillest)/sqrt(length(hillest)),  Q1=quantile(hillest, 0.25)    , 
+    #                    median=median(hillest),   Q3=quantile(hillest, 0.75)  , max=max(hillest)  )
+    #     
+    #     names(f) <- c("Biochemistry test",  "Visit", "Treatment","Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum")
+    #     
+    #     rownames(f) <- NULL
+    #     
+    #     
+    #     library(DT)
+    #     datatable(f,   
+    #               rownames = TRUE,
+    #               options = list(
+    #                   searching = TRUE,
+    #                   pageLength = input$V-1,
+    #                   paging=FALSE,
+    #                   lengthMenu = FALSE ,
+    #                   lengthChange = FALSE,
+    #                   autoWidth = FALSE
+    #                   # colReorder = TRUE,
+    #                   # deferRender = TRUE,
+    #                   # scrollY = 200,
+    #                   # scroller = T
+    #               ))  %>%
+    #         formatRound(
+    #             columns= c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=c(2)  )
+    #     
+    #     
+    # })
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # model output
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    output$reg.summary <- renderPrint({
-        
-        summary <- fit.regression0()$fit.res
-        
-        return(list(summary))
-        
-    })  
-    
-    output$reg.summaryx <- renderPrint({
-        
-        summary <- input$Plot
-        
-        return(list(summary))
-        
-    })  
-    
+    # output$reg.summary <- renderPrint({
+    #     
+    #     summary <- fit.regression0()$fit.res
+    #     
+    #     return(list(summary))
+    #     
+    # })  
+    # 
+    # output$reg.summaryx <- renderPrint({
+    #     
+    #     summary <- input$Plot
+    #     
+    #     return(list(summary))
+    #     
+    # })  
+    # 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
 })
 
