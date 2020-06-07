@@ -189,7 +189,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
      
                    ")), 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
-                            tabPanel("Plot and LMM fit", 
+                            tabPanel("A1. Plot & LMM", 
                                      #    h2("Plotting the data"),
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline")), 
@@ -209,7 +209,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Gls fit", value=3, 
+                            tabPanel("A2. GLS", value=3, 
                                      #  div( verbatimTextOutput("table2")),
                                      h4("xxxxxxxxxxxxxxxxxxx"),#
                                      h6("xxxxxxxxxxxxxxxx"),
@@ -224,7 +224,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Plot of the treatment effect estimates", value=6, 
+                            tabPanel("A3. GLS treatment effect", value=6, 
                                      h4("Modelling"),
                                      p(strong("xxxxxxxxxxxxxxx")),
                                      div(plotOutput("reg.plot2", width=fig.width, height=fig.height)), 
@@ -241,7 +241,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                     # div(class="span7", verbatimTextOutput("reg.summary2")),
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("selecting individual patients", 
+                            tabPanel("B1. Plots", 
                                      
                                      div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 7. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
@@ -262,7 +262,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Plot of the treatment effect estimates", 
+                            tabPanel("B2. GLS & LMM", 
                                      
                                      div(class="span7", verbatimTextOutput("reg.summaryb1")),
                                      h4(paste("Table 4. GLS fit to simulated data, reflecting treatment effect starting after baseline")), 
@@ -277,7 +277,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Plot of the treatment effect estimates2", 
+                            tabPanel("B3. GLS treatment effect", 
                                      
                                      div(plotOutput("reg.plot2b", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 4.  GLS fit to simulated data, treatment contrasts  treatment effect starting after baseline")), 
@@ -305,7 +305,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                          
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Diagnostics",
+                            tabPanel("B4. Diagnostics",
                                      h4("Four residual plots to check for absence of trends in central tendency and in variability"),
                                     div(plotOutput("res.diag", width=fig.width, height=fig.height)),       
                                      p(strong("Upper left panel shows the baseline score on the x-axis. 
@@ -316,7 +316,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             ),
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Data listing", value=3, 
+                            tabPanel("C1. Data listing", value=3, 
                                      #  h4("Data listing"),
                                      h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                     DT::dataTableOutput("table1"),
