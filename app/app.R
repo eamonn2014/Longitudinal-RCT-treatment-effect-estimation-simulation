@@ -15,20 +15,25 @@
   library(DT)
   
   options(max.print=1000000)
-  fig.width <- 1200
+  fig.width <- 1300
   fig.height <- 550
   fig.height2 <- 450
   library(shinythemes)        # more funky looking apps
   p1 <- function(x) {formatC(x, format="f", digits=1)}
   p2 <- function(x) {formatC(x, format="f", digits=2)}
   options(width=100)
+  colz = c("lightblue", "blue",  "lightgreen", "darkgreen")
    
   
   # function to create longitudinal data
   
   is.even <- function(x){ x %% 2 == 0 }
 
+  
  
+  
+
+  
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
@@ -39,37 +44,60 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                     gradient = "linear",
                     direction = "bottom"
                 ),
-                h3("Simulating longitudinal data analysing and estimating a treatment effect"),
+                h3("Simulating longitudinal data, analysing and estimating a treatment effect at each timepoint"),
+             
+             h4(p("We simulate longitudinal data in which patients are randomised to an active treatment arm and a placebo arm in a 1:1 fashion.
+             All patients have a baseline measurement but do not necessarliy have a a measurment at all visits. 
+             The selectors can be used to design the study and define true population parameters.
+             
+             
+             and analyse principaly using Generalized Least Squares (GLS) sometimes known as mixed effects repeated measures model 
+                  (MMRM), this is not a random effects model. For the GLS model we use Frank Harrell's 'rms' package, 
+                  unstructured correlation, a treatment visit interaction and a baseline visit 
+                  interaction (because the importance of the baseline will usually decrease over time).
+                  Confidence intervals are based on the Normal distribution. Often a Kenward Roger
+                  adjustment is made 
+                  to adjust the degrees of freedom and a t-dist. calculation used for 
+                  inference and CIs when sample size is considered small. We also using a mixed effects modelling approach using the 'lmer' package.
+                  Data is simulated intially for the treatment effect to start at baseline. This is analyses on tabs starting with 'A'.
+                  We then manipulate the simulated data so that the treatment effect can only manifest after baseline, see tabs starting 
+                  with 'B'. We also allow individual patient profiles to be visualised.
+            
+            
+                  ")),
+             h4(p("Plotting treatment differences is recommended '...it is very common to show traces
+                  over time of the mean response in each group together with standard error bars. 
+                  The standard error bars are commonly calculated by dividing the standard deviation 
+                  by the square root of, n, the number of observations. Thus the error of not comparing 
+                  the treatments is compounded by calculating a statistic that only applies when simple 
+                  random sampling occurs, which is never the case in clinical trials' 
+                  (CONTROL IN CLINICAL TRIALS, Senn 2010).")),
+             
                 shinyUI(pageWithSidebar(
                     headerPanel(" "),
                     
-                    
-                    
+                        
                     #sidebarPanel( 
                       
                       sidebarPanel( width=3 ,
                                     tags$style(type="text/css", ".span8 .well { background-color: #00FFFF; }"),
                       
                       
-                        div(p("xxxxxxxxxxx")),
+                                    
                         
                         div(
-                            
+                          actionButton(inputId='ab1', label="Shiny",   icon = icon("th"), 
+                                       onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton(inputId='ab1', label="R code",   icon = icon("th"), 
                                          onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton("resample", "Simulate a new sample"),
                             br(), br(),
                             tags$style(".well {background-color:#b6aebd ;}"), 
                             
-                            div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below"))),
-                          
-                                
-                                p(" "),
-                            
-                            div(("  
-                           xxxxxxxxxxxxxxxxxx ")),
-                            br(),
-                            
+                      
+                         
+                           # br(),
+                          div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below"))),
                             tags$head(
                               tags$style(HTML('#ab1{background-color:orange}'))
                             ),
@@ -77,12 +105,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tags$head(
                               tags$style(HTML('#resample{background-color:orange}'))
                             ),
-                            
-                            
-                            
-                            # selectInput("Plot",
-                            #             strong("1. Select which biochemistry test to present"),
-                            #             choices=biochemistry),
+                        
 
                             selectInput("Plot1",
                                         div(h5(tags$span(style="color:blue", "Select plot"))),
@@ -90,13 +113,23 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             
                             textInput('vec1', 
-                                      div(h5(tags$span(style="color:blue", "Select patient. If '2 select plot' 'Individual' is selected, enter sample ID(s) (comma delimited); 
-                                      enter 999 to show all profiles; If 'Individual all tests' is selected, all test results for the first ID only are presented"))),
+                                      div(h5(tags$span(style="color:blue", "Select patient(s) to view. If 'Select plot' 'Individual' is chosen, enter sample ID(s) (comma delimited); 
+                                      enter 999 to show all profiles"))),
                                        "1,2,3,4"),
                             
                             
-                            
-                            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                          ##try this
+                          # 200
+                          # 8
+                          # -1
+                          # -0.2
+                          # 10
+                          # 0
+                          # 9.1
+                          # 0.01
+                          
+                          
+                           #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             
                             sliderInput("N",
                                         div(h5(tags$span(style="color:blue", "total number of subjects"))),
@@ -104,11 +137,11 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             sliderInput("J",
                                         div(h5(tags$span(style="color:blue", "Maximum visit in data simulation including baseline"))),
-                                        min=3, max=10, step=1, value=8, ticks=FALSE),
+                                        min=3, max=10, step=1, value=9, ticks=FALSE),
                             
                             sliderInput("trt.effect",
                                         div(h5(tags$span(style="color:blue", "Treatment effect"))),
-                                        min = -10, max = 10, value = c(-1), step=1, ticks=FALSE),
+                                        min = -20, max = 20, value = c(16), step=1, ticks=FALSE),
                             
                             sliderInput("interaction",    
                                         div(h5(tags$span(style="color:blue", "Treatment time interaction"))),
@@ -116,7 +149,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             sliderInput("beta0", 
                                         div(h5(tags$span(style="color:blue", "Average intercept"))),
-                                              min = -10, max = 10, step=0.5, value = c(10), ticks=FALSE) ,
+                                              min = -100, max = 500, step=1, value = c(150), ticks=FALSE) ,
                             
                             sliderInput("beta1", 
                                         div(h5(tags$span(style="color:blue", "Average slope"))),
@@ -124,19 +157,19 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             sliderInput("q",   
                                         div(h5(tags$span(style="color:blue", "True intercept SD"))),
-                                        min = .1, max = 10, value = c(.5), step=.5, ticks=FALSE),
+                                        min = .1, max = 20, value = c(17), step=.5, ticks=FALSE),
                             
                             sliderInput("s",      
                                         div(h5(tags$span(style="color:blue", "True slope SD"))),
-                                        min = .01, max = 10, value = c(.01),step=.01,  ticks=FALSE),
+                                        min = .01, max = 10, value = c(.8),step=.01,  ticks=FALSE),
                             
                             sliderInput("r", 
                                         div(h5(tags$span(style="color:blue", "True intercept slope correlation"))),
-                                        min = -1, max = 1, value = c(.9), step=0.05, ticks=FALSE),
+                                        min = -1, max = 1, value = c(.95), step=0.05, ticks=FALSE),
                             
                             sliderInput("sigma",  
                                         div(h5(tags$span(style="color:blue",  "True error SD"  ))),
-                                        min =.01, max = 10, value = c(.1), step=.1, ticks=FALSE),
+                                        min =.01, max = 30, value = c(26), step=.1, ticks=FALSE),
                             
                             sliderInput("time.ref",
                                         div(h5(tags$span(style="color:blue", "Estimate treatment effect at this visit"))),
@@ -168,7 +201,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                     ),
                     
                     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~tab panels
-                    mainPanel(
+                    mainPanel(width=9 ,
                         
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         #    tabsetPanel(type = "tabs", 
@@ -199,20 +232,12 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      div(class="span7", verbatimTextOutput("reg.summary")),
                                      h4(paste("Table 1. Linear mixed model fit to simulated data, reflecting data generating mechanism, 
                                               treatment effect starting at baseline")), 
-                           #           p(strong(
-                           #               "xxxxxxxxxxx")) ,
-                           #           
-                           #           #                     
-                           #           p(strong("Txxxxxxxxxxxxxxxxx
-                           # ")),
-                                     
+                          
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("A2. GLS", value=3, 
-                                     #  div( verbatimTextOutput("table2")),
-                                     # h4("xxxxxxxxxxxxxxxxxxx"),#
-                                     # h6("xxxxxxxxxxxxxxxx"),
+                                   
                                      div(class="span7", verbatimTextOutput("reg.summary1")),
                                      h4(paste("Table 2. GLS fit to simulated data, reflecting data generating mechanism, 
                                               treatment effect starting at baseline")), 
@@ -220,8 +245,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("A3. GLS treatment effect", value=6, 
-                                     # h4("Modelling"),
-                                     # p(strong("xxxxxxxxxxxxxxx")),
+                                 
                                      div(plotOutput("reg.plot2", width=fig.width, height=fig.height)), 
                                      h4(paste("Figure 3. GLS fit to simulated data, treatment contrasts")), 
                                      
@@ -262,8 +286,6 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                    
                             ) ,
                             
-                            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                         
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B4. Diagnostics",
                                      h4("Figure 7. Four residual plots to check for absence of trends in central tendency and in variability"),
@@ -321,7 +343,7 @@ server <- shinyServer(function(input, output   ) {
                      )) 
   
         
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      })
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -392,7 +414,8 @@ server <- shinyServer(function(input, output   ) {
         flat.df <-  within(flat.df, y <-  alpha + time * beta + error * rnorm(n = M))
         flat.df$treat <- as.factor(flat.df$treat)
         flat.df$treat <- ifelse(flat.df$treat %in% 1, "Active","Placebo" )
-        
+        flat.df$treat <- factor(flat.df$treat) ##new
+        flat.df$treat <- relevel(flat.df$treat, ref= "Placebo")   ##new
         return(list(  flat.df = flat.df,  random.effects= random.effects, p=p) )
         
     }) 
@@ -431,6 +454,9 @@ server <- shinyServer(function(input, output   ) {
       d <-  both[, c("unit", "baseline", "treat", "time", "y")]
       d$time<-factor(d$time)
       d$treat<-factor(d$treat)
+      
+      d$treat <- relevel(d$treat, ref= "Placebo")   ##new
+      
       d$time <- relevel(d$time, ref=time.ref)
       
       # just put in random countries so no association
@@ -477,13 +503,13 @@ server <- shinyServer(function(input, output   ) {
       k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
                                list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
       
-      k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo" ),
-                                   list(time=time.,  treat = "Active" ))
+      k1a <- contrast(fit.res, list(time=time.,  treat ="Active" ),
+                                   list(time=time.,  treat = "Placebo" ))
       
       
       x <- as.data.frame(k1a[c('time', 'Contrast', 'Lower', 'Upper')]) 
       
-      namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
+      namez <- c("Follow-up Visit", "Active - Placebo", "Lower 95%CI","Upper 95%CI")
       
       names(x) <- namez
 
@@ -568,10 +594,8 @@ server <- shinyServer(function(input, output   ) {
         
         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
           geom_line() + geom_point() + ylab("response") + xlab("visit") +
-          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
-          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
-          # scale_shape_manual(values=c(3, 16))+ 
-          scale_color_manual(values=c('#999999','#E69F00'))+
+          stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
+          scale_color_manual(values=colz)+
           theme(legend.position="top") +
           xlim(0, J) +
           scale_x_continuous(breaks=c(0:J)) 
@@ -599,10 +623,8 @@ server <- shinyServer(function(input, output   ) {
         
         px <-  ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
           geom_line() + geom_point() + ylab("response") + xlab("visit") +
-          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
-          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
-          # scale_shape_manual(values=c(3, 16))+ 
-          scale_color_manual(values=c('#999999','#E69F00'))+
+          stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,   color=paste(treat, "Mean")     ) )+
+          scale_color_manual(values=colz)+
           theme(legend.position="top") +
           xlim(0, J) +
           scale_x_continuous(breaks=c(0:J)) 
@@ -612,9 +634,6 @@ server <- shinyServer(function(input, output   ) {
         
         print(pxx)
         
-        
-        
-        
       }   
       
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -622,10 +641,6 @@ server <- shinyServer(function(input, output   ) {
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       
     }) 
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit lmer regression on the data in which trt effect starts at baseline
@@ -651,7 +666,6 @@ server <- shinyServer(function(input, output   ) {
         return(list(summary))
         
     })  
-    
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit gls regression on the data in which trt effect starts at baseline and get contrasts over time
@@ -694,8 +708,8 @@ server <- shinyServer(function(input, output   ) {
       J <-  input$J
        time. <- rep(1:(J))
       
-      k1a <- rms::contrast(fit, list(j=time.,  treat = "Placebo"  ),
-                                list(j=time.,  treat = "Active"  ))
+      k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
+                                list(j=time.,  treat = "Placebo"  ))
       
       #k1a
       
@@ -703,8 +717,7 @@ server <- shinyServer(function(input, output   ) {
       return(list(fit.res= fit.res , k1a=k1a  ))
       
     })     
-    
-    
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # plot of treatment effect contrasts for data at which trt effect starts at baseline
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -730,7 +743,7 @@ server <- shinyServer(function(input, output   ) {
         xlim(1, J) +
         scale_x_continuous(breaks=c(time.)) +
 
-        ylab( 'Placebo - Active')+ xl +
+        ylab( 'Active - Placebo')+ xl +
         geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
         ggtitle(paste0("Outcome measure "," \ntreatment effect estimate at each visit with 95% CI")) +
         geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
@@ -760,11 +773,7 @@ server <- shinyServer(function(input, output   ) {
           plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
         )
 
-
-
-
     })
-    
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # boxplots of data at which trt effect starts at baseline allowing highlighting of selected patients
@@ -952,9 +961,6 @@ server <- shinyServer(function(input, output   ) {
       
       
     }) 
-    
-    
-    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # end boxplots of data at which trt effect starts at baseline highlighting individuals
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
@@ -1035,8 +1041,6 @@ server <- shinyServer(function(input, output   ) {
    #    
    # })
       
-      
-      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # plot of treatment effect for data at which trt effect starts after baseline
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1074,7 +1078,7 @@ server <- shinyServer(function(input, output   ) {
           xlim(1, J) +
           scale_x_continuous(breaks=c(time.)) +
           
-          ylab( 'Placebo - Active')+ xl +
+          ylab( 'Active - Placebo')+ xl +
           geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
           ggtitle(paste0("Outcome measure "," \ntreatment effect estimate at each visit with 95% CI")) +
           geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
@@ -1105,8 +1109,7 @@ server <- shinyServer(function(input, output   ) {
           )
         
       }) 
-      
-      
+     
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # spaghetti plot of the data in which trt effect starts after baseline 
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1455,10 +1458,8 @@ server <- shinyServer(function(input, output   ) {
         
         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
           geom_line() + geom_point() + ylab("response") + xlab("visit") +
-          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
-          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
-          # scale_shape_manual(values=c(3, 16))+ 
-          scale_color_manual(values=c('#999999','#E69F00'))+
+          stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
+          scale_color_manual(values=colz)+
           theme(legend.position="top") +
           xlim(0, J) +
           scale_x_continuous(breaks=c(0:J)) 
@@ -1486,10 +1487,8 @@ server <- shinyServer(function(input, output   ) {
         
         px <-  ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
           geom_line() + geom_point() + ylab("response") + xlab("visit") +
-          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
-          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
-          # scale_shape_manual(values=c(3, 16))+ 
-          scale_color_manual(values=c('#999999','#E69F00'))+
+          stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
+           scale_color_manual(values=colz)+          
           theme(legend.position="top") +
           xlim(0, J) +
           scale_x_continuous(breaks=c(0:J)) 
@@ -1504,9 +1503,9 @@ server <- shinyServer(function(input, output   ) {
         
       }   
       
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # end of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # end of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       
     }) 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
