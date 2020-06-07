@@ -199,66 +199,46 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      div(class="span7", verbatimTextOutput("reg.summary")),
                                      h4(paste("Table 1. Linear mixed model fit to simulated data, reflecting data generating mechanism, 
                                               treatment effect starting at baseline")), 
-                                     p(strong(
-                                         "xxxxxxxxxxx")) ,
-                                     
-                                     #                     
-                                     p(strong("Txxxxxxxxxxxxxxxxx
-                           ")),
+                           #           p(strong(
+                           #               "xxxxxxxxxxx")) ,
+                           #           
+                           #           #                     
+                           #           p(strong("Txxxxxxxxxxxxxxxxx
+                           # ")),
                                      
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("A2. GLS", value=3, 
                                      #  div( verbatimTextOutput("table2")),
-                                     h4("xxxxxxxxxxxxxxxxxxx"),#
-                                     h6("xxxxxxxxxxxxxxxx"),
+                                     # h4("xxxxxxxxxxxxxxxxxxx"),#
+                                     # h6("xxxxxxxxxxxxxxxx"),
                                      div(class="span7", verbatimTextOutput("reg.summary1")),
                                      h4(paste("Table 2. GLS fit to simulated data, reflecting data generating mechanism, 
                                               treatment effect starting at baseline")), 
-                                #     div(class="span7", verbatimTextOutput("reg.summary2")),
-                               #      h4(paste("Table 3. GLS fit to simulated data, treatment contrasts")), 
-                                   #  DT::dataTableOutput("table2"),
-                                     #h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
-                                     # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
-                                     
+
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("A3. GLS treatment effect", value=6, 
-                                     h4("Modelling"),
-                                     p(strong("xxxxxxxxxxxxxxx")),
+                                     # h4("Modelling"),
+                                     # p(strong("xxxxxxxxxxxxxxx")),
                                      div(plotOutput("reg.plot2", width=fig.width, height=fig.height)), 
-                                     h4(paste("Figure 2. GLS fit to simulated data, treatment contrasts")), 
+                                     h4(paste("Figure 3. GLS fit to simulated data, treatment contrasts")), 
                                      
                                      div(class="span7", verbatimTextOutput("reg.summary2c")),
-                                     h4(paste("Table 4. GLS fit to simulated data, treatment contrasts")), 
+                                     h4(paste("Table 3. GLS fit to simulated data, treatment contrasts")), 
                                      
-                                     
-                                     # div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
-                                     # h4(paste("Figure 3. Boxplots of simulated data")), 
-                                   #  div(class="span7", verbatimTextOutput("reg.summaryx")),
-                                  #   div(class="span7", verbatimTextOutput("table4")),
-                                    # div(class="span7", verbatimTextOutput("reg.summary2")),
+                              
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B1. Plots", 
                                      
-                                     div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
-                                     h4(paste("Figure 7. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
-                                     
                                      div(plotOutput("reg.plot99", width=fig.width, height=fig.height)), 
-                                     h4(paste("Figure 8. Spaghetti plot of simulated data, treatment effect starting after baseline")), 
+                                     h4(paste("Figure 4. Spaghetti plot of simulated data, treatment effect starting after baseline")), 
                                      
-                                     
-                                     
-                                     #  div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
-                                     #   div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
-                                     #  h4("Plot of the treatment effect estimates"),
-                                     #  h4("Plot of the treatment effect estimates"),
-                                     # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
-                                     # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
-                                     
-                                     
+                                     div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
+                                     h4(paste("Figure 5. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
+
                             ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -268,45 +248,25 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      h4(paste("Table 4. GLS fit to simulated data, reflecting treatment effect starting after baseline")), 
                                      div(class="span7", verbatimTextOutput("reg.summaryb2")),
                                      h4(paste("Table 5. LMM fit to simulated data, reflecting treatment effect starting after baseline")), 
-                                  #   div(class="span7", verbatimTextOutput("reg.summaryb3")),
-                                  #   h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts")), 
-                                     #  h4("Plot of the treatment effect estimates"),
-                                    # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
-                                    # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
-                                     
+                                  
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B3. GLS treatment effect", 
                                      
                                      div(plotOutput("reg.plot2b", width=fig.width, height=fig.height)),  
-                                     h4(paste("Figure 4.  GLS fit to simulated data, treatment contrasts  treatment effect starting after baseline")), 
+                                     h4(paste("Figure 6.  GLS fit to simulated data, treatment contrasts  treatment effect starting after baseline")), 
                                      
                                      div(class="span7", verbatimTextOutput("reg.summaryb3copy")),
-                                     h4(paste("Table 7. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts")), 
-                                     
-                                     
-                                     
-                                     
-                                     # div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
-                                     # h4(paste("Figure 5. Spaghetti plot of simulated data, treatment effect starting after baseline")), 
-                                     # div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
-                                     # 
-                                     # h4(paste("Figure 6. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
-                                     # 
-                                     #  h4("Plot of the treatment effect estimates"),
-                                     #  h4("Plot of the treatment effect estimates"),
-                                     # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
-                                     # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
-                                     
-                                     
+                                     h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts")), 
+                                   
                             ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                          
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B4. Diagnostics",
-                                     h4("Four residual plots to check for absence of trends in central tendency and in variability"),
+                                     h4("Figure 7. Four residual plots to check for absence of trends in central tendency and in variability"),
                                     div(plotOutput("res.diag", width=fig.width, height=fig.height)),       
                                      p(strong("Upper left panel shows the baseline score on the x-axis. 
                                               Upper right panel shows shows time on the x-axis, note though the selected reference level is plotted first.
@@ -1172,6 +1132,10 @@ server <- shinyServer(function(input, output   ) {
         
         k1a <- contrast(fit, list(time=time.,  treat = 'Placebo'),
                              list(time=time.,  treat = 'Active'))
+        
+        ###new
+        k1a <- contrast(fit, list(time=time.,  treat ="Placebo",   baseline=0, country=1),
+                             list(time=time.,  treat = "Active"  , baseline=0, country=1))
         
         k1a <- as.data.frame(k1a[c(3,4,6,7)])
         
