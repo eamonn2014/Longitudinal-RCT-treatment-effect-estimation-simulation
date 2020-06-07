@@ -474,7 +474,14 @@ server <- shinyServer(function(input, output   ) {
       k1 <- contrast(fit.res, list(time=time.,  treat ="Placebo", baseline=0, country=1),
                               list(time=time.,  treat = "Active"  , baseline=0, country=1))
       
-      x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
+      k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
+                               list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
+      
+      k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo" ),
+                                   list(time=time.,  treat = "Active" ))
+      
+      
+      x <- as.data.frame(k1a[c('time', 'Contrast', 'Lower', 'Upper')]) 
       
       namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
       
@@ -618,80 +625,7 @@ server <- shinyServer(function(input, output   ) {
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit lmer regression on the data in which trt effect starts at baseline
@@ -1025,21 +959,6 @@ server <- shinyServer(function(input, output   ) {
     # end boxplots of data at which trt effect starts at baseline highlighting individuals
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # boxplots of data at which trt effect starts at baseline REPLACED ABOVE
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1124,6 +1043,8 @@ server <- shinyServer(function(input, output   ) {
     
       output$reg.plot2b <- renderPlot({         
         
+        d<- make.data2()$d
+        
         k1a <- fit.regression.base()$x
         fit <- fit.regression.base()$fit.res
         J <-  input$J
@@ -1133,10 +1054,10 @@ server <- shinyServer(function(input, output   ) {
         k1a <- contrast(fit, list(time=time.,  treat = 'Placebo'),
                              list(time=time.,  treat = 'Active'))
         
-        ###new
-        k1a <- contrast(fit, list(time=time.,  treat ="Placebo",   baseline=0, country=1),
-                             list(time=time.,  treat = "Active"  , baseline=0, country=1))
-        
+        ###new see 474
+        # k1a <- contrast(fit, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
+        #                      list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
+        # 
         k1a <- as.data.frame(k1a[c(3,4,6,7)])
         
         mi <- floor(min(k1a$Lower))
