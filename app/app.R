@@ -189,12 +189,14 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
      
                    ")), 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
-                            tabPanel("Plot and lmer fit", 
+                            tabPanel("Plot and LMM fit", 
                                      #    h2("Plotting the data"),
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
-                                     
+                                     h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline")), 
                                      h3(" "),
                                      div(class="span7", verbatimTextOutput("reg.summary")),
+                                     h4(paste("Table 1. Linear mixed model fit to simulated data, reflecting data generating mechanism, 
+                                              treatment effect starting at baseline")), 
                                      p(strong(
                                          "xxxxxxxxxxx")) ,
                                      
@@ -210,7 +212,10 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      h4("xxxxxxxxxxxxxxxxxxx"),#
                                      h6("xxxxxxxxxxxxxxxx"),
                                      div(class="span7", verbatimTextOutput("reg.summary1")),
+                                     h4(paste("Table 2. GLS fit to simulated data, reflecting data generating mechanism, 
+                                              treatment effect starting at baseline")), 
                                      div(class="span7", verbatimTextOutput("reg.summary2")),
+                                     h4(paste("Table 3. GLS fit to simulated data, treatment contrasts")), 
                                    #  DT::dataTableOutput("table2"),
                                      #h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                      # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
@@ -220,8 +225,10 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("Plot of the treatment effect estimates", value=6, 
                                      h4("Modelling"),
                                      p(strong("xxxxxxxxxxxxxxx")),
-                                     div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
-                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot2", width=fig.width, height=fig.height)), 
+                                     h4(paste("Figure 2. GLS fit to simulated data, treatment contrasts")), 
+                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
+                                     h4(paste("Figure 3. Boxplots of simulated data")), 
                                    #  div(class="span7", verbatimTextOutput("reg.summaryx")),
                                   #   div(class="span7", verbatimTextOutput("table4")),
                                     # div(class="span7", verbatimTextOutput("reg.summary2")),
@@ -231,8 +238,11 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("Plot of the treatment effect estimates", 
                                      
                                      div(class="span7", verbatimTextOutput("reg.summaryb1")),
+                                     h4(paste("Table 4. GLS fit to simulated data, reflecting treatment effect starting after baseline")), 
                                      div(class="span7", verbatimTextOutput("reg.summaryb2")),
+                                     h4(paste("Table 5. LMM fit to simulated data, reflecting treatment effect starting after baseline")), 
                                      div(class="span7", verbatimTextOutput("reg.summaryb3")),
+                                     h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts")), 
                                      #  h4("Plot of the treatment effect estimates"),
                                     # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
                                     # div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
@@ -243,8 +253,14 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("Plot of the treatment effect estimates2", 
                                      
                                      div(plotOutput("reg.plot2b", width=fig.width, height=fig.height)),  
+                                     h4(paste("Figure 4.  GLS fit to simulated data, treatment contrasts  treatment effect starting after baseline")), 
+                                     
                                      div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
+                                     h4(paste("Figure 5. Spaghetti plot of simulated data, treatment effect starting after baseline")), 
                                      div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
+                                     
+                                     h4(paste("Figure 6. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
+                                     
                                      #  h4("Plot of the treatment effect estimates"),
                                      #  h4("Plot of the treatment effect estimates"),
                                      # div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
@@ -257,7 +273,13 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("selecting individual patients", 
                                      
                                      div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
+                                     h4(paste("Figure 7. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
+                                     
                                      div(plotOutput("reg.plot99", width=fig.width, height=fig.height)), 
+                                     h4(paste("Figure 8. Spaghetti plot of simulated data, treatment effect starting after baseline")), 
+                                     
+                                     
+                                     
                                    #  div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
                                   #   div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
                                      #  h4("Plot of the treatment effect estimates"),
