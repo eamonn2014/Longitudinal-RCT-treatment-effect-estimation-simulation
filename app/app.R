@@ -194,6 +194,8 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline")), 
                                      h3(" "),
+                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
+                                     h4(paste("Figure 2. Boxplots of simulated data")), 
                                      div(class="span7", verbatimTextOutput("reg.summary")),
                                      h4(paste("Table 1. Linear mixed model fit to simulated data, reflecting data generating mechanism, 
                                               treatment effect starting at baseline")), 
@@ -227,8 +229,8 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      p(strong("xxxxxxxxxxxxxxx")),
                                      div(plotOutput("reg.plot2", width=fig.width, height=fig.height)), 
                                      h4(paste("Figure 2. GLS fit to simulated data, treatment contrasts")), 
-                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
-                                     h4(paste("Figure 3. Boxplots of simulated data")), 
+                                     # div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
+                                     # h4(paste("Figure 3. Boxplots of simulated data")), 
                                    #  div(class="span7", verbatimTextOutput("reg.summaryx")),
                                   #   div(class="span7", verbatimTextOutput("table4")),
                                     # div(class="span7", verbatimTextOutput("reg.summary2")),
@@ -801,27 +803,27 @@ server <- shinyServer(function(input, output   ) {
     # plot of treatment effect contrasts for data at which trt effect starts at baseline
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    output$reg.plot2 <- renderPlot({         
-      
+    output$reg.plot2 <- renderPlot({
+
       k1a <-  fit.regression.gls0()$k1a
-       
+
       J <-  input$J
       time. <- rep(1:(J))
       k1a <- as.data.frame(k1a[c(1,2,4,5)])
-      
+
       mi <- floor(min(k1a$Lower))
       ma <- ceiling(max(k1a$Upper))
-      
+
       names(k1a) <- (c( "Time",'Contrast', 'Lower', 'Upper'))
-      
+
       xl <- xlab( 'Follow up visit (Visit 1 is baseline)')
-      
+
       ggplot (k1a, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
         ylim(mi,ma) +
         #   xlim(1, input$V-1) +
         xlim(1, J) +
         scale_x_continuous(breaks=c(time.)) +
-        
+
         ylab( 'Placebo - Active')+ xl +
         geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
         ggtitle(paste0("Outcome measure "," \ntreatment effect estimate at each visit with 95% CI")) +
@@ -851,18 +853,22 @@ server <- shinyServer(function(input, output   ) {
           panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
           plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
         )
-      
-      
-      
-      
-    }) 
-    
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # boxplots of data at which trt effect starts at baseline
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    output$reg.plot3 <- renderPlot({         
+
+
+
+    })
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # boxplots of data at which trt effect starts at baseline allowing highlighting of selected patients
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    # --------------------------------------------------------------------------
+    # -----------------------------------------------OVERALL PLOT
+    # ---------------------------------------------------------------------------
+    
+    output$reg.plot3 <- renderPlot({ 
       
       flat.df <- make.data()$flat.df
       d <- flat.df
@@ -871,68 +877,272 @@ server <- shinyServer(function(input, output   ) {
       d$rep <- d$unit
       d$yij <- d$y
       d$time <- factor(d$time)
-      # lets get counts to put in ribbons
-      d$trt <- factor(d$trt)
-      dx <- unique(d[,c("rep","trt")])
-      table(dx$trt)
-      n <- as.vector(table(dx$trt))
-      levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
       
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      pd <- position_dodge(.4)
-      pr1=NULL
-      pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
-        stat_boxplot(geom = "errorbar", width = 0.3) +
-        geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
-        geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
-        scale_size_manual( values = c( 1) ) +
-        geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
-        stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-                     position=pd, show.legend=FALSE) +
-        scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
-        scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
-        facet_wrap(~trt , ncol=2)    +
-        labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
+      if (input$Plot1 == "Overall") {
         
-        geom_text(data = d %>% group_by( time, trt) %>%
-                    dplyr::summarise(Count = n()) %>%
-                    ungroup %>%
-                    mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
-                  aes(label = paste0("n = ", Count)),
-                  position = pd, size=3, show.legend = FALSE) 
+        
+        # lets get counts to put in ribbons
+        d$trt <- factor(d$trt)
+        dx <- unique(d[,c("rep","trt")])
+        table(dx$trt)
+        n <- as.vector(table(dx$trt))
+        levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+        
+        
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        pd <- position_dodge(.4)
+        pr1=NULL
+        pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
+          stat_boxplot(geom = "errorbar", width = 0.3) +
+          geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
+          geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
+          scale_size_manual( values = c( 1) ) +
+          geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+          stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+                       position=pd, show.legend=FALSE) +
+          scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
+          scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
+          facet_wrap(~trt , ncol=2)    +
+          labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
+          
+          geom_text(data = d %>% group_by( time, trt) %>%
+                      dplyr::summarise(Count = n()) %>%
+                      ungroup %>%
+                      mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
+                    aes(label = paste0("n = ", Count)),
+                    position = pd, size=3, show.legend = FALSE) 
+        
+        
+        print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
+                ggtitle(paste0("There are N=",
+                               length(unique(d$rep)),  
+                               " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
+                theme_bw() +
+                theme(legend.position="none") +
+                theme(#panel.background=element_blank(),
+                  # axis.text.y=element_blank(),
+                  # axis.ticks.y=element_blank(),
+                  # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                  # stop axis being clipped
+                  plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                  legend.text=element_text(size=14),
+                  legend.title=element_text(size=14),
+                  legend.position="none",
+                  axis.text.x  = element_text(size=15),
+                  axis.text.y  = element_text(size=15),
+                  axis.line.x = element_line(color="black"),
+                  axis.line.y = element_line(color="black"),
+                  plot.caption=element_text(hjust = 0, size = 11),
+                  strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                  axis.title.y = element_text(size = rel(1.5), angle = 90),
+                  axis.title.x = element_text(size = rel(1.5), angle = 0),
+                  strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                  panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                  plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+                ) 
+        )
+        
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+      }  else  if (input$Plot1 == "Individual") {
+        
+        
+        i <- as.numeric(unlist(strsplit(input$vec1,",")))
+        
+        d$trt <- factor(d$trt)
+        dx <- unique(d[,c("rep","trt")])
+        table(dx$trt)
+        n <- as.vector(table(dx$trt))
+        levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+        
+        
+        #  if 999 is entered all subjects are shown
+        
+        if("999" %in% i) {
+          
+          dd<-d
+          
+        } else {
+          
+          dd <- d[d$rep %in% i,]
+        }
+        
+        sel <- unique(dd$trt) #if only one arm , dont show the empty arm
+        d <- d[d$trt %in% sel,]
+        
+        dx <- unique(dd[,c("rep","trt")])
+        
+        nn <- as.vector(table(dx$trt))
+        
+        levels(d$trt)  <- levels(dd$trt) <-
+          c(paste0("Active N=",n[1], " with " ,nn[1]," patient profile(s) shown"),
+            paste0("Placebo N=",n[2], " with " ,nn[2]," patient profile(s) shown"))
+        
+        
+        
+        pd <- position_dodge(.4)
+        pr1=NULL
+        pr1<-ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt )) +
+          stat_boxplot(geom = "errorbar", width = 0.3) +
+          geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +
+          
+          geom_line(data = dd,
+                    aes(group=rep,x = time, y = yij),  size = .6, linetype="solid", colour='red' , position = pd) +  # pd added here
+          scale_size_manual( values = c( 1) ) +
+          
+          geom_point(data=dd, aes(fill=trt, group=rep),
+                     pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
+          
+          geom_point(aes(fill=trt, group=rep),
+                     pch=1, size=2, alpha=0.2, position = pd ) +
+          
+          stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+                       position=pd, show.legend=FALSE) +
+          scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+          scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
+          facet_wrap(~trt , ncol=2)    +
+          labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 – 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.")+
+          
+          geom_text(data = dd %>% group_by( time, trt) %>%
+                      summarise(Count = n()) %>%
+                      ungroup %>%
+                      mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
+                    aes(label = paste0("n = ", Count)),
+                    position = pd, size=5, show.legend = FALSE)
+        
+        print(pr1 + labs(y="Response", x = 'Visit (0 denotes the baseline visit)') +
+                
+                ggtitle(paste0("There are N=",
+                               length(unique(d$rep)),
+                               " patients with data at baseline, presenting selected patient profiles") ) +
+                theme_bw() +
+                theme(legend.position="none") +
+                theme(#panel.background=element_blank(),
+                  # axis.text.y=element_blank(),
+                  # axis.ticks.y=element_blank(),
+                  # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                  # stop axis being clipped
+                  plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                  legend.text=element_text(size=14),
+                  legend.title=element_text(size=14),
+                  legend.position="none",
+                  axis.text.x  = element_text(size=15),
+                  axis.text.y  = element_text(size=15),
+                  axis.line.x = element_line(color="black"),
+                  axis.line.y = element_line(color="black"),
+                  plot.caption=element_text(hjust = 0, size = 11),
+                  strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                  axis.title.y = element_text(size = rel(1.5), angle = 90),
+                  axis.title.x = element_text(size = rel(1.5), angle = 0),
+                  strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                  panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                  plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+                )
+        )
+        
+      }   
       
       
-      print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
-              ggtitle(paste0("There are N=",
-                             length(unique(d$rep)),  
-                             " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
-              theme_bw() +
-              theme(legend.position="none") +
-              theme(#panel.background=element_blank(),
-                # axis.text.y=element_blank(),
-                # axis.ticks.y=element_blank(),
-                # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-                # stop axis being clipped
-                plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-                legend.text=element_text(size=14),
-                legend.title=element_text(size=14),
-                legend.position="none",
-                axis.text.x  = element_text(size=15),
-                axis.text.y  = element_text(size=15),
-                axis.line.x = element_line(color="black"),
-                axis.line.y = element_line(color="black"),
-                plot.caption=element_text(hjust = 0, size = 11),
-                strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-                axis.title.y = element_text(size = rel(1.5), angle = 90),
-                axis.title.x = element_text(size = rel(1.5), angle = 0),
-                strip.background = element_rect(colour = "black", fill = "#ececf0"),
-                panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-                plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-              ) 
-      )
-      #   input$Plot
-      
-   })
+    }) 
+    
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # end boxplots of data at which trt effect starts at baseline highlighting individuals
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # boxplots of data at which trt effect starts at baseline REPLACED ABOVE
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   #  output$reg.plot3 <- renderPlot({         
+   #    
+   #    flat.df <- make.data()$flat.df
+   #    d <- flat.df
+   #    
+   #    d$trt <- d$treat
+   #    d$rep <- d$unit
+   #    d$yij <- d$y
+   #    d$time <- factor(d$time)
+   #    # lets get counts to put in ribbons
+   #    d$trt <- factor(d$trt)
+   #    dx <- unique(d[,c("rep","trt")])
+   #    table(dx$trt)
+   #    n <- as.vector(table(dx$trt))
+   #    levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+   #    
+   #    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   #    pd <- position_dodge(.4)
+   #    pr1=NULL
+   #    pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
+   #      stat_boxplot(geom = "errorbar", width = 0.3) +
+   #      geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
+   #      geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
+   #      scale_size_manual( values = c( 1) ) +
+   #      geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+   #      stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+   #                   position=pd, show.legend=FALSE) +
+   #      scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
+   #      scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
+   #      facet_wrap(~trt , ncol=2)    +
+   #      labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
+   #      
+   #      geom_text(data = d %>% group_by( time, trt) %>%
+   #                  dplyr::summarise(Count = n()) %>%
+   #                  ungroup %>%
+   #                  mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
+   #                aes(label = paste0("n = ", Count)),
+   #                position = pd, size=3, show.legend = FALSE) 
+   #    
+   #    
+   #    print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
+   #            ggtitle(paste0("There are N=",
+   #                           length(unique(d$rep)),  
+   #                           " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
+   #            theme_bw() +
+   #            theme(legend.position="none") +
+   #            theme(#panel.background=element_blank(),
+   #              # axis.text.y=element_blank(),
+   #              # axis.ticks.y=element_blank(),
+   #              # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+   #              # stop axis being clipped
+   #              plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+   #              legend.text=element_text(size=14),
+   #              legend.title=element_text(size=14),
+   #              legend.position="none",
+   #              axis.text.x  = element_text(size=15),
+   #              axis.text.y  = element_text(size=15),
+   #              axis.line.x = element_line(color="black"),
+   #              axis.line.y = element_line(color="black"),
+   #              plot.caption=element_text(hjust = 0, size = 11),
+   #              strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+   #              axis.title.y = element_text(size = rel(1.5), angle = 90),
+   #              axis.title.x = element_text(size = rel(1.5), angle = 0),
+   #              strip.background = element_rect(colour = "black", fill = "#ececf0"),
+   #              panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+   #              plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
+   #            ) 
+   #    )
+   #    #   input$Plot
+   #    
+   # })
       
       
       
@@ -1257,11 +1467,13 @@ server <- shinyServer(function(input, output   ) {
             pr1<-ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt )) +
                 stat_boxplot(geom = "errorbar", width = 0.3) +
                 geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +
+              
                 geom_line(data = dd,
-                          aes(group=rep,x = time, y = yij),  size = .6, linetype="dashed") +
+                          aes(group=rep,x = time, y = yij),  size = .6, linetype="solid", position = pd, colour='red',) +  # new pd added
                 scale_size_manual( values = c( 1) ) +
                 geom_point(data=dd, aes(fill=trt, group=rep),
                            pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
+              
                 geom_point(aes(fill=trt, group=rep),
                            pch=1, size=2, alpha=0.2, position = pd ) +
                 stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
