@@ -145,7 +145,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             sliderInput("interaction",    
                                         div(h5(tags$span(style="color:blue", "Treatment time interaction"))),
-                                        min = -1, max = 1, value = c(-.2), step=.1, ticks=FALSE),
+                                        min = -10, max = 10, value = c(-.2), step=.1, ticks=FALSE),
                             
                             sliderInput("beta0", 
                                         div(h5(tags$span(style="color:blue", "Average intercept"))),
