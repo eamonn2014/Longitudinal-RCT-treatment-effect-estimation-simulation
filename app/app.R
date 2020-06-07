@@ -450,14 +450,14 @@ server <- shinyServer(function(input, output   ) {
       
       d<- make.data2()$d
       
-      my.lmer <-  lmer(y ~  country + baseline * treat + time * treat + (1 + as.numeric(time) | unit), data = d)
+      my.lmer <-  lmer(y ~  country + baseline * time + time * treat + (1 + as.numeric(time) | unit), data = d)
       
       ddz <<- datadist(d)  # need the double in this environ <<
       options(datadist='ddz')
       
       
       (fit.res <-  
-          tryCatch(Gls(y  ~ country + baseline * treat + time * treat ,
+          tryCatch(Gls(y  ~ country + baseline * time + time * treat ,
                        correlation=corSymm(form = ~as.numeric(time) | unit) ,
                        weights=varIdent(form=~1|time),
                        d, x=TRUE,

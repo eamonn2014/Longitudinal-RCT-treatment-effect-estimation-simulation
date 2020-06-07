@@ -371,11 +371,11 @@ my.lmer <- NULL
 my.lmer <-  lmer(y ~   time * treat + (1 + as.numeric(time) | unit), data = d)
 summary(my.lmer)
 my.lmer <- NULL
-my.lmer <-  lmer(y ~  baseline * treat + time * treat + (1 + as.numeric(time) | unit), data = d)
+my.lmer <-  lmer(y ~  baseline * time + time * treat + (1 + as.numeric(time) | unit), data = d)
 summary(my.lmer)
 
 
-my.lmer <-  lmer(y ~  country + baseline * treat + time * treat + (1 + as.numeric(time) | unit), data = d)
+my.lmer <-  lmer(y ~  country + baseline * time + time * treat + (1 + as.numeric(time) | unit), data = d)
 summary(my.lmer)
 
 require(rms)
@@ -385,7 +385,7 @@ options(datadist='ddz')
 
 
 (fit.res <-  
-    tryCatch(Gls(y  ~ country + baseline * treat + time * treat ,
+    tryCatch(Gls(y  ~ country + baseline * time + time * treat ,
                  correlation=corSymm(form = ~as.numeric(time) | unit) ,
                  weights=varIdent(form=~1|time),
                  d, x=TRUE,
