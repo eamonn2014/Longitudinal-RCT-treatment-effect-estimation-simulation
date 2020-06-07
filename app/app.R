@@ -544,21 +544,180 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # spaghetti plot of the data in which trt effect starts at baseline 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    output$reg.plot1 <- renderPlot({         
+    # output$reg.plot1 <- renderPlot({         
+    #     
+    #     flat.df <- make.data()$flat.df
+    #     
+    #     ggplot(flat.df,   aes (x = time, y = y, group = unit, color = treat)) +
+    #         geom_line() + geom_point() + ylab("response") + xlab("visit") +
+    #         stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+    #         # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+    #         # scale_shape_manual(values=c(3, 16))+ 
+    #         scale_color_manual(values=c('#999999','#E69F00'))+
+    #         theme(legend.position="top") +
+    #         xlim(0, J) +
+    #         scale_x_continuous(breaks=c(0:J)) 
+    #     
+    # }) 
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # start of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    # --------------------------------------------------------------------------
+    # -----------------------------------------------OVERALL PLOT
+    # ---------------------------------------------------------------------------
+    
+    output$reg.plot1 <- renderPlot({ 
+      
+      J <-  input$J
+      all <- make.data()$flat.df
+      # nbaseline <- make.data2()$nbaseline
+      # all <- rbind(tmp, nbaseline)
+      all$time <- as.numeric(as.character(all$time ))
+      
+      if (input$Plot1 == "Overall") {
         
-        flat.df <- make.data()$flat.df
         
-        ggplot(flat.df,   aes (x = time, y = y, group = unit, color = treat)) +
-            geom_line() + geom_point() + ylab("response") + xlab("visit") +
-            stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
-            # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
-            # scale_shape_manual(values=c(3, 16))+ 
-            scale_color_manual(values=c('#999999','#E69F00'))+
-            theme(legend.position="top") +
-            xlim(0, J) +
-            scale_x_continuous(breaks=c(0:J)) 
+        # lets get counts to put in ribbons
         
+        
+        ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+          # scale_shape_manual(values=c(3, 16))+ 
+          scale_color_manual(values=c('#999999','#E69F00'))+
+          theme(legend.position="top") +
+          xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) 
+        
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+      }  else  if (input$Plot1 == "Individual") {
+        
+        i <- as.numeric(unlist(strsplit(input$vec1,",")))
+        
+        #  if 999 is entered all subjects are shown
+        
+        if("999" %in% i) {
+          
+          dd<-all #d
+          
+        } else {
+          
+          
+          dd <- all[all$unit %in% i,]
+        }
+        
+        
+        px <-  ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+          # scale_shape_manual(values=c(3, 16))+ 
+          scale_color_manual(values=c('#999999','#E69F00'))+
+          theme(legend.position="top") +
+          xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) 
+        
+        pxx <- px +  geom_line(data = dd,
+                               aes(group=unit,x = time, y = y),    linetype="solid", col='red', size=1) 
+        
+        print(pxx)
+        
+        
+        
+        
+      }   
+      
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # end of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      
     }) 
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # fit lmer regression on the data in which trt effect starts at baseline
@@ -639,7 +798,7 @@ server <- shinyServer(function(input, output   ) {
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # plot of treatment effect for data at which trt effect starts at baseline
+    # plot of treatment effect contrasts for data at which trt effect starts at baseline
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     output$reg.plot2 <- renderPlot({         
