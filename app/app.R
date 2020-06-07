@@ -254,9 +254,10 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("selecying patient", 
+                            tabPanel("selecting individual patients", 
                                      
                                      div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot99", width=fig.width, height=fig.height)), 
                                    #  div(plotOutput("reg.plot3b", width=fig.width, height=fig.height)),  
                                   #   div(plotOutput("reg.plot4b", width=fig.width, height=fig.height)),  
                                      #  h4("Plot of the treatment effect estimates"),
@@ -823,7 +824,7 @@ server <- shinyServer(function(input, output   ) {
       # spaghetti plot of the data in which trt effect starts after baseline 
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-          output$reg.plot3b <- renderPlot({         
+        output$reg.plot3b <- renderPlot({         
         
         
         tmp <- make.data2()$tmp
@@ -948,7 +949,7 @@ server <- shinyServer(function(input, output   ) {
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # boxplots of data at which trt effect starts after baseline allwing highlighting of selected patients
+    # boxplots of data at which trt effect starts after baseline allowing highlighting of selected patients
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     # --------------------------------------------------------------------------
@@ -1128,13 +1129,91 @@ server <- shinyServer(function(input, output   ) {
 
         }   
 
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # end of boxplots of data at which trt effect starts after baseline allwing highlighting of selected patients
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
+      
     }) 
     
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # end of boxplots of data at which trt effect starts after baseline allowing highlighting of selected patients
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # start of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
+    # --------------------------------------------------------------------------
+    # -----------------------------------------------OVERALL PLOT
+    # ---------------------------------------------------------------------------
+    
+    output$reg.plot99 <- renderPlot({ 
+      
+      J <-  input$J
+      tmp <- make.data2()$tmp
+      nbaseline <- make.data2()$nbaseline
+      all <- rbind(tmp, nbaseline)
+      all$time <- as.numeric(as.character(all$time ))
+      
+      if (input$Plot1 == "Overall") {
+        
+        
+        # lets get counts to put in ribbons
+     
+        
+        ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+          # scale_shape_manual(values=c(3, 16))+ 
+          scale_color_manual(values=c('#999999','#E69F00'))+
+          theme(legend.position="top") +
+          xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) 
+        
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+      }  else  if (input$Plot1 == "Individual") {
+        
+        i <- as.numeric(unlist(strsplit(input$vec1,",")))
+        
+        #  if 999 is entered all subjects are shown
+        
+        if("999" %in% i) {
+          
+          dd<-all #d
+          
+        } else {
+          
+          
+          dd <- all[all$unit %in% i,]
+        }
+
+        
+        px <-  ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
+          # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
+          # scale_shape_manual(values=c(3, 16))+ 
+          scale_color_manual(values=c('#999999','#E69F00'))+
+          theme(legend.position="top") +
+          xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) 
+        
+        pxx <- px +  geom_line(data = dd,
+                               aes(group=unit,x = time, y = y),    linetype="solid", col='red', size=1) 
+        
+        print(pxx)
+        
+        
+         
+        
+      }   
+      
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # end of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      
+    }) 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Diagnostics using data at which trt effect starts after baseline
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
