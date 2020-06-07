@@ -258,8 +258,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      h4(paste("Figure 6.  GLS fit to simulated data, treatment contrasts  treatment effect starting after baseline")), 
                                      
                                      div(class="span7", verbatimTextOutput("reg.summaryb3copy")),
-                                     h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts. Note model output for treatment effect is when baseline=0 and country=1. Which is probably not sensible.
-                                              Here treatment effect is estimated for median baseline.")), 
+                                     h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts.")), 
                                    
                             ) ,
                             
