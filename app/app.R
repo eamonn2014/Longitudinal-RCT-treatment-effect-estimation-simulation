@@ -475,8 +475,8 @@ server <- shinyServer(function(input, output   ) {
       #                list(time=time.,  treat =  "Active", baseline=median(d$baseline)))
       # 
       # match model output
-      k1 <- contrast(fit.res, list(time=time.,  treat = "Placebo", baseline=0, country=1),
-                              list(time=time.,  treat =  "Active", baseline=0, country=1))
+      k1 <- contrast(fit.res, list(time=time.,  treat ="Placebo", baseline=0, country=1),
+                              list(time=time.,  treat = "Active"  , baseline=0, country=1))
       
       x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
       
@@ -605,8 +605,8 @@ server <- shinyServer(function(input, output   ) {
       J <-  input$J
        time. <- rep(1:(J))
       
-      k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
-                                list(j=time.,  treat = "Placebo" ))
+      k1a <- rms::contrast(fit, list(j=time.,  treat = "Placebo"  ),
+                                list(j=time.,  treat = "Active"  ))
       
       #k1a
       
