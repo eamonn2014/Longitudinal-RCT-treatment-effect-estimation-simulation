@@ -258,7 +258,8 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      h4(paste("Figure 6.  GLS fit to simulated data, treatment contrasts  treatment effect starting after baseline")), 
                                      
                                      div(class="span7", verbatimTextOutput("reg.summaryb3copy")),
-                                     h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts")), 
+                                     h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts. Note model output for treatment effect is when baseline=0 and country=1. Which is probably not sensible.
+                                              Here treatment effect is estimated for median baseline.")), 
                                    
                             ) ,
                             
@@ -1050,20 +1051,19 @@ server <- shinyServer(function(input, output   ) {
         J <-  input$J
         time. <- rep(1:(J-1))
       
-        
-        k1a <- contrast(fit, list(time=time.,  treat = 'Placebo'),
-                             list(time=time.,  treat = 'Active'))
-        
-        ###new see 474
-        # k1a <- contrast(fit, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
-        #                      list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
+        ## code this out###########################################################
+        # k1a <- contrast(fit, list(time=time.,  treat = 'Placebo'),
+        #                      list(time=time.,  treat = 'Active'))
         # 
-        k1a <- as.data.frame(k1a[c(3,4,6,7)])
-        
+        # 
+        # k1a <- as.data.frame(k1a[c(3,4,6,7)])
+        # 
         mi <- floor(min(k1a$Lower))
         ma <- ceiling(max(k1a$Upper))
-        
+        # 
         names(k1a) <- (c( "Time",'Contrast', 'Lower', 'Upper'))
+        ## end code this out
+        
         
         k1 <- as.data.frame(k1a)
         

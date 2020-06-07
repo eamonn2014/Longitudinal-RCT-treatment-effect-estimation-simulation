@@ -400,12 +400,25 @@ fit <-  fit.res
 
 time. <- rep(1:(J-1))
 
-k1 <- contrast(fit, list(time=time.,  treat = "Placebo", baseline=median(d$baseline)),
-                    list(time=time.,  treat =  "Active", baseline=median(d$baseline)))
+k1 <- contrast(fit, list(time=time.,  treat = "Placebo" ),
+               list(time=time.,  treat =  "Active" ))
+
+k1 <- contrast(fit, list(time=time.,  treat = "Placebo" ),
+               list(time=time.,  treat =  "Active" ),type='average' )
+
+k1 <- contrast(fit, list(time=4.,  treat = "Placebo" ),
+               list(time=4,  treat =  "Active" ),type='average' )
+
 
 # match model output
 k1 <- contrast(fit, list(time=time.,  treat = "Placebo", baseline=0, country=1),
                     list(time=time.,  treat =  "Active", baseline=0, country=1))
+
+ 
+
+k1 <- contrast(fit, list(time=time.,  treat = "Placebo", baseline=median(d$baseline), country=1),
+               list(time=time.,  treat =  "Active",      baseline=median(d$baseline), country=1))
+
 
 x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
 
