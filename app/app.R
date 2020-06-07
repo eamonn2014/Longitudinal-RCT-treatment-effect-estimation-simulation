@@ -361,7 +361,7 @@ server <- shinyServer(function(input, output   ) {
         N        <-  sample$N 
         intercept <-  sample$beta0 
         slope    <-  sample$beta1
-        sigma    <-  sample$sigma
+        error    <-  sample$sigma
         q        <-  sample$q # standard deviations for the intercept 
         s        <-  sample$s # standard deviations for slope
         r        <-  sample$r # random effects correlation of slope internet
