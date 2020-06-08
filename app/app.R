@@ -70,13 +70,9 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                 shinyUI(pageWithSidebar(
                     headerPanel(" "),
                     
-                        
-                    #sidebarPanel( 
-                      
                       sidebarPanel( width=3 ,
                                     tags$style(type="text/css", ".span8 .well { background-color: #00FFFF; }"),
-                      
-                       
+
                         div(
                           actionButton(inputId='ab1', label="Shiny",   icon = icon("th"), 
                                        onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
@@ -86,7 +82,6 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             br(), br(),
                             tags$style(".well {background-color:#b6aebd ;}"), 
                             
-                       
                           div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below"))),
                             tags$head(
                               tags$style(HTML('#ab1{background-color:orange}'))
@@ -465,11 +460,11 @@ server <- shinyServer(function(input, output   ) {
       time. <- rep(1:(J-1))
       
 
-      k1 <- contrast(fit.res, list(time=time.,  treat ="Placebo", baseline=0, country=1),
-                              list(time=time.,  treat = "Active"  , baseline=0, country=1))
-      
-      k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
-                               list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
+      # k1 <- contrast(fit.res, list(time=time.,  treat ="Placebo", baseline=0, country=1),
+      #                         list(time=time.,  treat = "Active"  , baseline=0, country=1))
+      # 
+      # k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
+      #                          list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
       
       k1a <- contrast(fit.res, list(time=time.,  treat ="Active" ),
                                    list(time=time.,  treat = "Placebo" ))
