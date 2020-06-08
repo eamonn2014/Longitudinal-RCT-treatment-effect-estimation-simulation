@@ -13,6 +13,7 @@
   library(shinyWidgets)
   library(lme4)
   library(DT)
+  library("shinyalert")
   
   options(max.print=1000000)
   fig.width <- 1300
@@ -32,7 +33,7 @@
  
 ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
                 # paper
-             #   useShinyalert(),  # Set up shinyalert
+               useShinyalert(),  # Set up shinyalert
                 setBackgroundColor(
                     color = c( "#2171B5", "#F7FBFF"), 
                     gradient = "linear",
@@ -45,7 +46,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
              The selectors can be used to design the study and define true population parameters.
              
              
-            We analyse principally using Generalized Least Squares (GLS) sometimes known as mixed effects repeated measures model 
+            We analyse principally using Generalized Least Squares (GLS) sometimes known as mixed effects model repeat measurement 
                   (MMRM), this is not a random effects model. For the GLS model we use Frank Harrell's 'rms' package, 
                   unstructured correlation, a treatment visit interaction and a baseline visit 
                   interaction (because the importance of the baseline will usually decrease over time).
@@ -180,7 +181,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("A1. Plot & LMM", 
                                      
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
-                                     h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline")), 
+                                     h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline, with mean trend lines")), 
                                      h3(" "),
                                      div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
                                      h4(paste("Figure 2. Boxplots of simulated data")), 
@@ -211,7 +212,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("B1. Plots", 
                                      
                                      div(plotOutput("reg.plot99", width=fig.width, height=fig.height)), 
-                                     h4(paste("Figure 4. Spaghetti plot of simulated data, treatment effect starting after baseline")), 
+                                     h4(paste("Figure 4. Spaghetti plot of simulated data, treatment effect starting after baseline, with mean trend lines")), 
                                      
                                      div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 5. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
@@ -302,6 +303,15 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
 server <- shinyServer(function(input, output   ) {
     
     
+    #__________________________________________________________________________
+  
+  
+  shinyalert("Welcome! \nLet's simulate longitudinal data and estimate treatment effects",
+             "Generalized Least Squares (GLS)", 
+             type = "info")
+  
+  
+  
     # --------------------------------------------------------------------------
     # This is where a new sample is instigated 
     random.sample <- reactive({
