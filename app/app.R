@@ -9,7 +9,7 @@
   library(shiny) 
   library(nlme)
   library(MASS)
-  require(tidyverse)
+  library(tidyverse)
   library(shinyWidgets)
   library(lme4)
   library(DT)
