@@ -51,7 +51,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
              The selectors can be used to design the study and define true population parameters.
              
              
-             and analyse principaly using Generalized Least Squares (GLS) sometimes known as mixed effects repeated measures model 
+            We analyse principally using Generalized Least Squares (GLS) sometimes known as mixed effects repeated measures model 
                   (MMRM), this is not a random effects model. For the GLS model we use Frank Harrell's 'rms' package, 
                   unstructured correlation, a treatment visit interaction and a baseline visit 
                   interaction (because the importance of the baseline will usually decrease over time).
@@ -186,7 +186,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                  
                             div(p( strong("References:"))),  
 
-                            tags$a(href = "https://en.wikipedia.org/wiki/Anscombe%27s_quartet", "[1] Anscombe's quartet"),
+                            tags$a(href = "https://www.slideshare.net/Medresearch/recommendations-for-the-primary-analysis-of-continuous-endpoints", "[1] MMRM"),
                             div(p(" ")),
                             tags$a(href = "https://en.wikipedia.org/wiki/Comprehensive_metabolic_panel", "[2] Comprehensive metabolic panel"),
                             div(p(" ")),
@@ -299,9 +299,21 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("C1. Data listing", value=3, 
-                                     #  h4("Data listing"),
+                                  
                                      h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                     DT::dataTableOutput("table1"),
+                                     
+                                     
+                            ),
+                            
+                            
+                            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            tabPanel("D. Notes", value=3, 
+                                     
+                                     h5("Be patient as GLS models can take ~30 secs to run.
+                                        Typically a primary comparison is prespecified, for example a contrast (difference in means between treatments 
+                                        at a nominated visit/ timepoint."),
+                                    
                                      
                                      
                             ) 
