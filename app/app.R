@@ -24,16 +24,10 @@
   options(width=100)
   colz = c("lightblue", "blue",  "lightgreen", "darkgreen")
    
-  
-  # function to create longitudinal data
-  
-  is.even <- function(x){ x %% 2 == 0 }
+   # function to create longitudinal data
+   is.even <- function(x){ x %% 2 == 0 }
 
-  
- 
-  
-
-  
+   
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
@@ -82,9 +76,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                       sidebarPanel( width=3 ,
                                     tags$style(type="text/css", ".span8 .well { background-color: #00FFFF; }"),
                       
-                      
-                                    
-                        
+                       
                         div(
                           actionButton(inputId='ab1', label="Shiny",   icon = icon("th"), 
                                        onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
@@ -94,9 +86,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             br(), br(),
                             tags$style(".well {background-color:#b6aebd ;}"), 
                             
-                      
-                         
-                           # br(),
+                       
                           div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below"))),
                             tags$head(
                               tags$style(HTML('#ab1{background-color:orange}'))
@@ -106,31 +96,17 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                               tags$style(HTML('#resample{background-color:orange}'))
                             ),
                         
-
                             selectInput("Plot1",
                                         div(h5(tags$span(style="color:blue", "Select plot"))),
                                         choices=c("Overall","Individual" )),
-                            
                             
                             textInput('vec1', 
                                       div(h5(tags$span(style="color:blue", "Select patient(s) to view. If 'Select plot' 'Individual' is chosen, enter sample ID(s) (comma delimited); 
                                       enter 999 to show all profiles"))),
                                        "1,2,3,4"),
-                            
-                            
-                          ##try this
-                          # 200
-                          # 8
-                          # -1
-                          # -0.2
-                          # 10
-                          # 0
-                          # 9.1
-                          # 0.01
-                          
-                          
+ 
                            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            
+                           # user input setup
                             sliderInput("N",
                                         div(h5(tags$span(style="color:blue", "total number of subjects"))),
                                         min=2, max=500, step=1, value=200, ticks=FALSE),
@@ -174,16 +150,8 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             sliderInput("time.ref",
                                         div(h5(tags$span(style="color:blue", "Estimate treatment effect at this visit"))),
                                         min=1, max=10, step=1, value=4, ticks=FALSE),
-                           
-                           
-                           
-                           
-                           
-                           
-                           
-                  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+               #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             
-                 
                             div(p( strong("References:"))),  
 
                             tags$a(href = "https://github.com/eamonn2014/Longitudinal-RCT-treatment-effect-estimation-simulation/blob/master/recommendations-for-the-primary-analysis-of-continuous-endpoints4590.pdf", "[1] MMRM"),
@@ -194,18 +162,14 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             div(p(" ")),
                             tags$a(href = "https://twitter.com/f2harrell/status/1220700181496320001", "[4] Purpose of RCT"),
                             div(p(" ")),
-                            
-                            
+
                         )
                         
                     ),
-                    
-                    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~tab panels
+                     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~tab panels
                     mainPanel(width=9 ,
-                        
-                        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        #    tabsetPanel(type = "tabs", 
-                        navbarPage(       
+                         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                         navbarPage(       
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
                             tags$style(HTML(" 
                             .navbar-default .navbar-brand {color: cyan;}
@@ -223,7 +187,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                    ")), 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("A1. Plot & LMM", 
-                                     #    h2("Plotting the data"),
+                                     
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline")), 
                                      h3(" "),
@@ -233,7 +197,6 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      h4(paste("Table 1. Linear mixed model fit to simulated data, reflecting data generating mechanism, 
                                               treatment effect starting at baseline")), 
                           
-                                     
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("A2. GLS", value=3, 
@@ -252,7 +215,6 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      div(class="span7", verbatimTextOutput("reg.summary2c")),
                                      h4(paste("Table 3. GLS fit to simulated data, treatment contrasts")), 
                                      
-                              
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B1. Plots", 
@@ -273,7 +235,6 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      div(class="span7", verbatimTextOutput("reg.summaryb2")),
                                      h4(paste("Table 5. LMM fit to simulated data, reflecting treatment effect starting after baseline")), 
                                   
-                                     
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B3. GLS treatment effect", 
@@ -285,7 +246,6 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                      h4(paste("Table 6. GLS fit to simulated data,  reflecting treatment effect starting after baseline, treatment contrasts.")), 
                                    
                             ) ,
-                            
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("B4. Diagnostics",
                                      h4("Figure 7. Four residual plots to check for absence of trends in central tendency and in variability"),
@@ -302,20 +262,14 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                   
                                      h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                     DT::dataTableOutput("table1"),
-                                     
-                                     
                             ),
-                            
-                            
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("D. Notes", value=3, 
                                      
                                      h5("Be patient as GLS models can take ~30 secs to run.
                                         Typically a primary comparison is prespecified, for example a contrast (difference in means) between treatments 
                                         at a nominated visit/ timepoint. Running the mixed model is useful to validate the estimates of the GLS model and vice versa."),
-                                    
-                                     
-                                     
+
                             ) 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         )
@@ -472,8 +426,6 @@ server <- shinyServer(function(input, output   ) {
       d$time<-factor(d$time)
       d$treat<-factor(d$treat)
       
-    #  d$treat <- relevel(d$treat, ref= "Placebo")   ##new
-      
       d$time <- relevel(d$time, ref=time.ref)
       
       # just put in random countries so no association
@@ -512,10 +464,7 @@ server <- shinyServer(function(input, output   ) {
       J <-  input$J
       time. <- rep(1:(J-1))
       
-      # k1 <- contrast(fit, list(time=time.,  treat = "Placebo", baseline=median(d$baseline)),
-      #                list(time=time.,  treat =  "Active", baseline=median(d$baseline)))
-      # 
-      # match model output
+
       k1 <- contrast(fit.res, list(time=time.,  treat ="Placebo", baseline=0, country=1),
                               list(time=time.,  treat = "Active"  , baseline=0, country=1))
       
@@ -565,8 +514,6 @@ server <- shinyServer(function(input, output   ) {
     })  
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
-    
-  
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # spaghetti plot of the data in which trt effect starts at baseline 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -585,14 +532,10 @@ server <- shinyServer(function(input, output   ) {
     #         scale_x_continuous(breaks=c(0:J)) 
     #     
     # }) 
-    
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # start of spaghetti plots of data at which trt effect starts after baseline allowing highlighting of selected patients
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
     # --------------------------------------------------------------------------
     # -----------------------------------------------OVERALL PLOT
     # ---------------------------------------------------------------------------
@@ -601,15 +544,9 @@ server <- shinyServer(function(input, output   ) {
       
       J <-  input$J
       all <- make.data()$flat.df
-      # nbaseline <- make.data2()$nbaseline
-      # all <- rbind(tmp, nbaseline)
       all$time <- as.numeric(as.character(all$time ))
       
       if (input$Plot1 == "Overall") {
-        
-        
-        # lets get counts to put in ribbons
-        
         
         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
           geom_line() + geom_point() + ylab("response") + xlab("visit") +
@@ -712,11 +649,10 @@ server <- shinyServer(function(input, output   ) {
       ddz <<- datadist(tmp)  # need the double in rshiny environ <<
       options(datadist='ddz')
       
-      #j works but not time consecutive integer error in gls?
+      #j works but not time... consecutive integer error in gls?
       #table(tmp$j, tmp$time)
       #tmp$j <- as.factor(tmp$j )
-      
-      
+
       fit.res <- NULL
       (fit.res <-
           tryCatch(Gls(y  ~ treat + j * treat ,
@@ -730,14 +666,11 @@ server <- shinyServer(function(input, output   ) {
      fit <-  fit.res
       
       J <-  input$J
-       time. <- rep(1:(J))
+      time. <- rep(1:(J))
       
       k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
                                 list(j=time.,  treat = "Placebo"  ))
-      
-      #k1a
-      
-      
+    
       return(list(fit.res= fit.res , k1a=k1a  ))
       
     })     
@@ -988,83 +921,7 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # end boxplots of data at which trt effect starts at baseline highlighting individuals
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # boxplots of data at which trt effect starts at baseline REPLACED ABOVE
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   #  output$reg.plot3 <- renderPlot({         
-   #    
-   #    flat.df <- make.data()$flat.df
-   #    d <- flat.df
-   #    
-   #    d$trt <- d$treat
-   #    d$rep <- d$unit
-   #    d$yij <- d$y
-   #    d$time <- factor(d$time)
-   #    # lets get counts to put in ribbons
-   #    d$trt <- factor(d$trt)
-   #    dx <- unique(d[,c("rep","trt")])
-   #    table(dx$trt)
-   #    n <- as.vector(table(dx$trt))
-   #    levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
-   #    
-   #    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   #    pd <- position_dodge(.4)
-   #    pr1=NULL
-   #    pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
-   #      stat_boxplot(geom = "errorbar", width = 0.3) +
-   #      geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
-   #      geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
-   #      scale_size_manual( values = c( 1) ) +
-   #      geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
-   #      stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-   #                   position=pd, show.legend=FALSE) +
-   #      scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
-   #      scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
-   #      facet_wrap(~trt , ncol=2)    +
-   #      labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
-   #      
-   #      geom_text(data = d %>% group_by( time, trt) %>%
-   #                  dplyr::summarise(Count = n()) %>%
-   #                  ungroup %>%
-   #                  mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
-   #                aes(label = paste0("n = ", Count)),
-   #                position = pd, size=3, show.legend = FALSE) 
-   #    
-   #    
-   #    print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
-   #            ggtitle(paste0("There are N=",
-   #                           length(unique(d$rep)),  
-   #                           " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
-   #            theme_bw() +
-   #            theme(legend.position="none") +
-   #            theme(#panel.background=element_blank(),
-   #              # axis.text.y=element_blank(),
-   #              # axis.ticks.y=element_blank(),
-   #              # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-   #              # stop axis being clipped
-   #              plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-   #              legend.text=element_text(size=14),
-   #              legend.title=element_text(size=14),
-   #              legend.position="none",
-   #              axis.text.x  = element_text(size=15),
-   #              axis.text.y  = element_text(size=15),
-   #              axis.line.x = element_line(color="black"),
-   #              axis.line.y = element_line(color="black"),
-   #              plot.caption=element_text(hjust = 0, size = 11),
-   #              strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-   #              axis.title.y = element_text(size = rel(1.5), angle = 90),
-   #              axis.title.x = element_text(size = rel(1.5), angle = 0),
-   #              strip.background = element_rect(colour = "black", fill = "#ececf0"),
-   #              panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-   #              plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-   #            ) 
-   #    )
-   #    #   input$Plot
-   #    
-   # })
-      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # plot of treatment effect for data at which trt effect starts after baseline
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1077,21 +934,12 @@ server <- shinyServer(function(input, output   ) {
         fit <- fit.regression.base()$fit.res
         J <-  input$J
         time. <- rep(1:(J-1))
-      
-        ## code this out###########################################################
-        # k1a <- contrast(fit, list(time=time.,  treat = 'Placebo'),
-        #                      list(time=time.,  treat = 'Active'))
-        # 
-        # 
-        # k1a <- as.data.frame(k1a[c(3,4,6,7)])
-        # 
+ 
         mi <- floor(min(k1a$Lower))
         ma <- ceiling(max(k1a$Upper))
-        # 
+    
         names(k1a) <- (c( "Time",'Contrast', 'Lower', 'Upper'))
-        ## end code this out
-        
-        
+         
         k1 <- as.data.frame(k1a)
         
         xl <- xlab( 'Follow up visit (baseline not shown)')
@@ -1134,116 +982,6 @@ server <- shinyServer(function(input, output   ) {
         
       }) 
      
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # spaghetti plot of the data in which trt effect starts after baseline 
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
-#         output$reg.plot3b <- renderPlot({         
-#         
-#         
-#         tmp <- make.data2()$tmp
-#         nbaseline <- make.data2()$nbaseline
-#       
-#         all <- rbind(tmp, nbaseline)
-#         
-#         all$time <- as.numeric(as.character(all$time ))
-#         
-#         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
-#           geom_line() + geom_point() + ylab("response") + xlab("visit") +
-#           stat_summary(fun=mean,geom="line", colour="black",lwd=1,aes(group=treat ) ) +
-#           # geom_smooth(method=lm, se=FALSE, fullrange=TRUE )+
-#           # scale_shape_manual(values=c(3, 16))+ 
-#           scale_color_manual(values=c('#999999','#E69F00'))+
-#           theme(legend.position="top") +
-#           xlim(0, J) +
-#           scale_x_continuous(breaks=c(0:J)) 
-#         
-#     
-#       }) 
-#       
-      
-      
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # boxplots of data at which trt effect starts after baseline 
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      #     
-      # output$reg.plot4b <- renderPlot({         
-      #   
-      #   
-      #   tmp <- make.data2()$tmp
-      #   nbaseline <- make.data2()$nbaseline
-      #   
-      #   all <- rbind(tmp, nbaseline)
-      #   
-      #   #####################################################################################################
-      #   
-      #   d <- all  # add this to shown baslein
-      #   d$trt <- d$treat
-      #   d$rep <- d$unit
-      #   d$yij <- d$y
-      #   d$time <- factor(d$time)
-      #   
-      #   # lets get counts to put in ribbons
-      #   d$trt <- factor(d$trt)
-      #   dx <- unique(d[,c("rep","trt")])
-      #   table(dx$trt)
-      #   n <- as.vector(table(dx$trt))
-      #   levels(d$trt) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
-      #   
-      #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      #   pd <- position_dodge(.4)
-      #   pr1=NULL
-      #   pr1 <- ggplot(d,aes(x=time ,y=yij,color=trt, fill=trt ))  + 
-      #     stat_boxplot(geom = "errorbar", width = 0.3) +
-      #     geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
-      #     geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
-      #     scale_size_manual( values = c( 1) ) +
-      #     geom_point(aes(fill=trt, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
-      #     stat_summary(fun=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-      #                  position=pd, show.legend=FALSE) +
-      #     scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
-      #     scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
-      #     facet_wrap(~trt , ncol=2)    +
-      #     labs(caption = "- The upper whisker is located at the smaller of the maximum y value and Q3 + 1.5xIQR, whereas the lower whisker is located at the larger of the smallest y value and Q1 - 1.5xIQR\n- The median is the horizontal line inside each box and the mean denoted by the cross\n -Individual patient profiles are denoted by dotted lines\n- A small amount of jitter is added to the data to aid visualisation.") +
-      #     
-      #     geom_text(data = d %>% group_by( time, trt) %>%
-      #                 dplyr::summarise(Count = n()) %>%
-      #                 ungroup %>%
-      #                 mutate(yij=min((d$yij)) - 0.05 * diff(range((d$yij)))),
-      #               aes(label = paste0("n = ", Count)),
-      #               position = pd, size=3, show.legend = FALSE) 
-      #   
-      #   
-      #   print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
-      #           ggtitle(paste0("There are N=",
-      #                          length(unique(d$rep)),  
-      #                          " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
-      #           theme_bw() +
-      #           theme(legend.position="none") +
-      #           theme(#panel.background=element_blank(),
-      #             # axis.text.y=element_blank(),
-      #             # axis.ticks.y=element_blank(),
-      #             # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
-      #             # stop axis being clipped
-      #             plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
-      #             legend.text=element_text(size=14),
-      #             legend.title=element_text(size=14),
-      #             legend.position="none",
-      #             axis.text.x  = element_text(size=15),
-      #             axis.text.y  = element_text(size=15),
-      #             axis.line.x = element_line(color="black"),
-      #             axis.line.y = element_line(color="black"),
-      #             plot.caption=element_text(hjust = 0, size = 11),
-      #             strip.text.x = element_text(size = 16, colour = "black", angle = 0),
-      #             axis.title.y = element_text(size = rel(1.5), angle = 90),
-      #             axis.title.x = element_text(size = rel(1.5), angle = 0),
-      #             strip.background = element_rect(colour = "black", fill = "#ececf0"),
-      #             panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
-      #             plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
-      #           ) 
-      #   )
-      # 
-      # }) 
       
    output$reg.summary1 <- renderPrint({
       
@@ -1261,13 +999,7 @@ server <- shinyServer(function(input, output   ) {
       
     })  
     
-   # output$reg.summary2c   <- renderPrint({
-   #   
-   #   summary <- fit.regression.gls0()$k1a.copy
-   #   
-   #   return(list(summary))
-   #   
-   # })  
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # boxplots of data at which trt effect starts after baseline allowing highlighting of selected patients
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1628,70 +1360,7 @@ server <- shinyServer(function(input, output   ) {
       
         
     })
-    # 
-    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # # summary stats
-    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # 
-    # output$table2 = DT::renderDataTable({
-    #     
-    #     foo<- make.data()$d1
-    #     
-    #     target <- input$Plot
-    #     
-    #     foo <- foo[foo$test %in% target,]
-    #     
-    #     f<-plyr::ddply(foo, c("test", "memorypar","tailindex"), summarise,
-    #                    min=min(hillest),mean = mean(hillest), sd = sd(hillest, na.rm=TRUE),
-    #                    sem = sd(hillest)/sqrt(length(hillest)),  Q1=quantile(hillest, 0.25)    , 
-    #                    median=median(hillest),   Q3=quantile(hillest, 0.75)  , max=max(hillest)  )
-    #     
-    #     names(f) <- c("Biochemistry test",  "Visit", "Treatment","Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum")
-    #     
-    #     rownames(f) <- NULL
-    #     
-    #     
-    #     library(DT)
-    #     datatable(f,   
-    #               rownames = TRUE,
-    #               options = list(
-    #                   searching = TRUE,
-    #                   pageLength = input$V-1,
-    #                   paging=FALSE,
-    #                   lengthMenu = FALSE ,
-    #                   lengthChange = FALSE,
-    #                   autoWidth = FALSE
-    #                   # colReorder = TRUE,
-    #                   # deferRender = TRUE,
-    #                   # scrollY = 200,
-    #                   # scroller = T
-    #               ))  %>%
-    #         formatRound(
-    #             columns= c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=c(2)  )
-    #     
-    #     
-    # })
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # model output
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    # output$reg.summary <- renderPrint({
-    #     
-    #     summary <- fit.regression0()$fit.res
-    #     
-    #     return(list(summary))
-    #     
-    # })  
-    # 
-    # output$reg.summaryx <- renderPrint({
-    #     
-    #     summary <- input$Plot
-    #     
-    #     return(list(summary))
-    #     
-    # })  
-    # 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  
 })
 
 # Run the application 
