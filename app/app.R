@@ -481,6 +481,8 @@ server <- shinyServer(function(input, output   ) {
       
       d<- make.data2()$d
       
+      d$treat <- relevel(d$treat, ref= "Placebo")  # NEW
+      
       my.lmer <-  lmer(y ~  country + baseline * time + time * treat + (1 + as.numeric(time) | unit), data = d)
       
       ddz <<- datadist(d)  # need the double in this environ <<
@@ -656,6 +658,8 @@ server <- shinyServer(function(input, output   ) {
         
         flat.df <- make.data()$flat.df
         
+        flat.df$treat <- relevel(flat.df$treat, ref= "Placebo")  #NEW
+        
         my.lmer <-  lmer(y ~    time * treat + (1 + time | unit), data = flat.df)
 
         return(list(fit.res= summary(my.lmer) ))
@@ -692,12 +696,15 @@ server <- shinyServer(function(input, output   ) {
       #table(tmp$j, tmp$time)
       tmp$j <- as.factor(tmp$j )
       
+      tmp$treat <- relevel(tmp$treat, ref= "Placebo")
+      
       ddz <<- datadist(tmp)  # need the double in rshiny environ <<
       options(datadist='ddz')
       
       #j works but not time consecutive integer error in gls?
       #table(tmp$j, tmp$time)
       #tmp$j <- as.factor(tmp$j )
+      
       
       fit.res <- NULL
       (fit.res <-
