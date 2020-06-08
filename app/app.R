@@ -531,7 +531,7 @@ server <- shinyServer(function(input, output   ) {
       # k1a <- contrast(fit.res, list(time=time.,  treat ="Placebo",   baseline=median(d$baseline), country=1),
       #                          list(time=time.,  treat = "Active"  , baseline=median(d$baseline), country=1))
       
-      k1a <- contrast(fit.res, list(time=time.,  treat ="Active" ),
+      k1a <- rms::contrast(fit.res, list(time=time.,  treat ="Active" ),
                                    list(time=time.,  treat = "Placebo" ))
       
       
