@@ -45,7 +45,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # structure of experimental design, time points
  
-  x.grid = seq(0, 8, by = 8/J)[0:8]
+  #x.grid = seq(0, 8, by = 8/J)[0:8]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  # set up unbalanced visits everyone at first visit but randomly end up to max after that
@@ -90,7 +90,7 @@
     # scale_shape_manual(values=c(3, 16))+ 
     scale_color_manual(values=c('#999999','#E69F00'))+
     theme(legend.position="top") +
-    xlim(0, J) +
+    #xlim(0, J) +
     scale_x_continuous(breaks=c(0:J)) 
   
   plot1

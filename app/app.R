@@ -54,7 +54,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                   adjustment is made 
                   to adjust the degrees of freedom and a t-distribution calculation used for 
                   inference and CIs when sample size is considered small. We also using a mixed effects modelling approach using the 'lmer' package.
-                  Data is simulated intially for the treatment effect to start at baseline. This is analyses on tabs starting with 'A'.
+                  Data is simulated intially for the treatment effect to start at baseline. This is the analysis on tabs starting with 'A'.
                   We then manipulate the simulated data so that the treatment effect can only manifest after baseline, see tabs starting 
                   with 'B'. We also allow individual patient profiles to be visualised.
             
@@ -66,7 +66,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                   by the square root of, n, the number of observations. Thus the error of not comparing 
                   the treatments is compounded by calculating a statistic that only applies when simple 
                   random sampling occurs, which is never the case in clinical trials' 
-                  (CONTROL IN CLINICAL TRIALS, Senn 2010).")),
+                  (Control in Clinical Trials, Senn 2010).")),
              
                 shinyUI(pageWithSidebar(
                     headerPanel(" "),
@@ -296,7 +296,7 @@ new patient.
                                         The next tab B3 is a copy of A3 but using the data at which the treatment effect manifests after baseline. B4 presents model diagnostics for the GLS model used in the B tabs. 
                                         C1 is a searchable data listing."),
 
-                                     h4("The spaghetti and boxplot figures can be complemented by highlighting any number of individual patients. This is done by selecting the 'Individual' select plot option
+                                     h4("The spaghetti and boxplot figures can be augmented by highlighting any number of individual patients. This is done by selecting the 'Individual' select plot option
                                         and typing in a patient ID. Patient IDs are just integers from 1 to the total sample size.    
                                          Now what follows is a little discription of the user inputs: N is the total sample size to which treatment is assigned randomly 1:1. J is the maximum visit number in the study including the baseline. 
                                         'Treatment effect' is the constant average difference Active - Placebo. The next slider allows a different treatment effect at each visit.
@@ -416,7 +416,7 @@ server <- shinyServer(function(input, output   ) {
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # structure of experimental design and time points
  
-        x.grid = seq(0, 8, by = 8/J)[0:8]
+        #x.grid = seq(0, 8, by = 8/J)[0:8]
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # set up unbalanced visits everyone at first visit but randomly end after that
@@ -459,7 +459,7 @@ server <- shinyServer(function(input, output   ) {
       intercept <-  sample$beta0 
       slope     <-  sample$beta1
       error     <-  sample$sigma
-      
+      time.ref <-  sample$time.ref
       flat.df        <- make.data()$flat.df
       random.effects <- make.data()$random.effects
       p <- make.data()$p
@@ -745,7 +745,7 @@ server <- shinyServer(function(input, output   ) {
       time.ref <-  input$time.ref
       
       tmp <- flat.df
-      
+
       tmp$j <- factor(tmp$j)
       tmp$j <- relevel(tmp$j, ref=time.ref)
 
@@ -753,6 +753,8 @@ server <- shinyServer(function(input, output   ) {
       tmp$j <- as.factor(tmp$j )
       
       tmp$treat <- relevel(tmp$treat, ref= "Placebo")
+      
+
       
       ddz <<- datadist(tmp)  # need the double in rshiny environ <<
       options(datadist='ddz')
@@ -776,9 +778,12 @@ server <- shinyServer(function(input, output   ) {
       J <-  input$J
       time. <- rep(1:(J))
       
+
       k1a <- rms::contrast(fit, list(j=time.,  treat = "Active"  ),
                                 list(j=time.,  treat = "Placebo"  ))
     
+      # k1a$j <- k1a$j-1 # new
+      
       return(list(fit.res= fit.res , k1a=k1a  ))
       
     })     
@@ -789,12 +794,14 @@ server <- shinyServer(function(input, output   ) {
     
     output$reg.plot2 <- renderPlot({
 
+     
+      
       k1a <-  fit.regression.gls0()$k1a
 
       J <-  input$J
       time. <- rep(1:(J))
       k1a <- as.data.frame(k1a[c(1,2,4,5)])
-
+    
       mi <- floor(min(k1a$Lower))
       ma <- ceiling(max(k1a$Upper))
 
@@ -812,6 +819,9 @@ server <- shinyServer(function(input, output   ) {
         geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
         ggtitle(paste0("Outcome measure "," \ntreatment effect estimate at each visit with 95% CI")) +
         geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
+        
+        #scale_x_discrete(labels= newxticks) +
+        
         theme_bw() +
         theme(legend.position="none") +
         theme(#panel.background=element_blank(),
