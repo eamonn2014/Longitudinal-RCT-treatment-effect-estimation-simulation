@@ -38,7 +38,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                     gradient = "linear",
                     direction = "bottom"
                 ),
-                h3("Simulating longitudinal data, analysing and estimating a treatment effect at each timepoint"),
+                h3("Simulating longitudinal data, analysing and estimating a treatment effect at timepoints"),
              
              h4(p("We simulate longitudinal data in which patients are randomised to an active treatment arm and a placebo arm in a 1:1 fashion.
              All patients have a baseline measurement but do not necessarliy complete all visits. 
@@ -567,12 +567,36 @@ server <- shinyServer(function(input, output   ) {
       if (input$Plot1 == "Overall") {
         
         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
-          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          geom_line() + geom_point() + ylab("Response") + xlab("Visit") +
           stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
           scale_color_manual(values=colz)+
-          theme(legend.position="top") +
-          xlim(0, J) +
-          scale_x_continuous(breaks=c(0:J)) 
+          #theme(legend.position="top") +
+          #xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) +
+           
+          theme_bw() +
+          theme(#panel.background=element_blank(),
+            # axis.text.y=element_blank(),
+            # axis.ticks.y=element_blank(),
+            # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+            # stop axis being clipped
+            plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+            legend.text=element_text(size=14),
+            legend.title=element_text(size=14),
+            legend.position="top",
+            axis.text.x  = element_text(size=15),
+            axis.text.y  = element_text(size=15),
+            axis.line.x = element_line(color="black"),
+            axis.line.y = element_line(color="black"),
+            plot.caption=element_text(hjust = 0, size = 7),
+            strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+            axis.title.y = element_text(size = rel(1.5), angle = 90),
+            axis.title.x = element_text(size = rel(1.5), angle = 0),
+            #panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
+            panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
+            strip.background = element_rect(colour = "black", fill = "#ececf0"),
+            panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+            plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'))
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
@@ -595,13 +619,37 @@ server <- shinyServer(function(input, output   ) {
         }
         
         
-        px <-  ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
-          geom_line() + geom_point() + ylab("response") + xlab("visit") +
-          stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,   color=paste(treat, "Mean")     ) )+
+        px <-   ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
+          geom_line() + geom_point() + ylab("Response") + xlab("Visit") +
+          stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
           scale_color_manual(values=colz)+
-          theme(legend.position="top") +
-          xlim(0, J) +
-          scale_x_continuous(breaks=c(0:J)) 
+          #theme(legend.position="top") +
+          #xlim(0, J) +
+          scale_x_continuous(breaks=c(0:J)) +
+          
+          theme_bw() +
+          theme(#panel.background=element_blank(),
+            # axis.text.y=element_blank(),
+            # axis.ticks.y=element_blank(),
+            # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+            # stop axis being clipped
+            plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+            legend.text=element_text(size=14),
+            legend.title=element_text(size=14),
+            legend.position="top",
+            axis.text.x  = element_text(size=15),
+            axis.text.y  = element_text(size=15),
+            axis.line.x = element_line(color="black"),
+            axis.line.y = element_line(color="black"),
+            plot.caption=element_text(hjust = 0, size = 7),
+            strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+            axis.title.y = element_text(size = rel(1.5), angle = 90),
+            axis.title.x = element_text(size = rel(1.5), angle = 0),
+            #panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
+            panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
+            strip.background = element_rect(colour = "black", fill = "#ececf0"),
+            panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+            plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'))
         
         pxx <- px +  geom_line(data = dd,
                                aes(group=unit,x = time, y = y),    linetype="solid", col='red', size=1) 
@@ -1231,12 +1279,38 @@ server <- shinyServer(function(input, output   ) {
      
         
         ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
-          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          geom_line() + geom_point() + ylab("Response") + xlab("Visit") +
           stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
           scale_color_manual(values=colz)+
           theme(legend.position="top") +
           xlim(0, J) +
-          scale_x_continuous(breaks=c(0:J)) 
+          scale_x_continuous(breaks=c(0:J)) +
+          
+          theme_bw() +
+          theme(#panel.background=element_blank(),
+            # axis.text.y=element_blank(),
+            # axis.ticks.y=element_blank(),
+            # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+            # stop axis being clipped
+            plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+            legend.text=element_text(size=14),
+            legend.title=element_text(size=14),
+            legend.position="top",
+            axis.text.x  = element_text(size=15),
+            axis.text.y  = element_text(size=15),
+            axis.line.x = element_line(color="black"),
+            axis.line.y = element_line(color="black"),
+            plot.caption=element_text(hjust = 0, size = 7),
+            strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+            axis.title.y = element_text(size = rel(1.5), angle = 90),
+            axis.title.x = element_text(size = rel(1.5), angle = 0),
+            #panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
+            panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
+            strip.background = element_rect(colour = "black", fill = "#ececf0"),
+            panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+            plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'))
+        
+        
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
@@ -1260,12 +1334,36 @@ server <- shinyServer(function(input, output   ) {
 
         
         px <-  ggplot(all,   aes (x = time, y = y, group = unit, color = treat)) +
-          geom_line() + geom_point() + ylab("response") + xlab("visit") +
+          geom_line() + geom_point() + ylab("Response") + xlab("Visit") +
           stat_summary(fun=mean,geom="line", lwd=1,aes(group=treat  ,    color=paste(treat, "Mean")     ) )+
            scale_color_manual(values=colz)+          
           theme(legend.position="top") +
           xlim(0, J) +
-          scale_x_continuous(breaks=c(0:J)) 
+          scale_x_continuous(breaks=c(0:J)) +
+          
+          theme_bw() +
+          theme(#panel.background=element_blank(),
+            # axis.text.y=element_blank(),
+            # axis.ticks.y=element_blank(),
+            # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+            # stop axis being clipped
+            plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+            legend.text=element_text(size=14),
+            legend.title=element_text(size=14),
+            legend.position="top",
+            axis.text.x  = element_text(size=15),
+            axis.text.y  = element_text(size=15),
+            axis.line.x = element_line(color="black"),
+            axis.line.y = element_line(color="black"),
+            plot.caption=element_text(hjust = 0, size = 7),
+            strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+            axis.title.y = element_text(size = rel(1.5), angle = 90),
+            axis.title.x = element_text(size = rel(1.5), angle = 0),
+            #panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
+            panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
+            strip.background = element_rect(colour = "black", fill = "#ececf0"),
+            panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+            plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'))
         
         pxx <- px +  geom_line(data = dd,
                                aes(group=unit,x = time, y = y),    linetype="solid", col='red', size=1) 
