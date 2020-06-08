@@ -413,9 +413,10 @@ server <- shinyServer(function(input, output   ) {
         flat.df = merge(unit.df, within.unit.df)
         flat.df <-  within(flat.df, y <-  alpha + time * beta + error * rnorm(n = M))
         flat.df$treat <- as.factor(flat.df$treat)
+        
         flat.df$treat <- ifelse(flat.df$treat %in% 1, "Active","Placebo" )
         flat.df$treat <- factor(flat.df$treat) ##new
-        flat.df$treat <- relevel(flat.df$treat, ref= "Placebo")   ##new
+       # flat.df$treat <- relevel(flat.df$treat, ref= "Placebo")   ##new
         return(list(  flat.df = flat.df,  random.effects= random.effects, p=p) )
         
     }) 
@@ -429,6 +430,11 @@ server <- shinyServer(function(input, output   ) {
       sample <- random.sample()
 
       N        <-  sample$N 
+      intercept <-  sample$beta0 
+      slope    <-  sample$beta1
+      error    <-  sample$sigma
+      
+      
       flat.df        <- make.data()$flat.df
       random.effects <- make.data()$random.effects
       p <- make.data()$p
@@ -455,7 +461,7 @@ server <- shinyServer(function(input, output   ) {
       d$time<-factor(d$time)
       d$treat<-factor(d$treat)
       
-      d$treat <- relevel(d$treat, ref= "Placebo")   ##new
+    #  d$treat <- relevel(d$treat, ref= "Placebo")   ##new
       
       d$time <- relevel(d$time, ref=time.ref)
       
