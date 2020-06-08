@@ -1,5 +1,8 @@
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  rm(list = ls())
+# Frank Harrell
+# Always remember that the purpose of a parallel-group randomized trial is to compare the parallel groups, NOT to look at change from baseline. 
+# Baseline should always be an adjustment covariate (only).
+ rm(list = ls())
   set.seed(2345)
   library(mvtnorm) 
   library(rms)
