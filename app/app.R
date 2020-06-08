@@ -41,7 +41,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                 h3("Simulating longitudinal data, analysing and estimating a treatment effect at each timepoint"),
              
              h4(p("We simulate longitudinal data in which patients are randomised to an active treatment arm and a placebo arm in a 1:1 fashion.
-             All patients have a baseline measurement but do not necessarliy have a a measurment at all visits. 
+             All patients have a baseline measurement but do not necessarliy complete all visits. 
              The selectors can be used to design the study and define true population parameters.
              
              
@@ -261,11 +261,44 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("D. Notes", value=3, 
                                      
-                                     h5("Be patient as GLS models can take ~30 secs to run.
-                                        Typically a primary comparison is prespecified, for example a contrast (difference in means) between treatments 
-                                        at a nominated visit/ timepoint. Running the mixed model is useful to validate the estimates of the GLS model and vice versa."),
+                                
+                                     
+                                     h4("Tab A1 presents a sphagetti plot of the data over time with mean lines drawn. 
+You can see a treatment effect is already apparant at baseline. We also present boxplots over time joining patients and showing a count of data points at each visit. 
+Horizontal jitter is added to help visualise the data. At the bottom we present a random effects analysis of the data using a linear mixed model (LMM) , this mimics the data generating
+mechanism so we should recover approximately the true population parameters. Tab A2 presents the Generalized Least Squares (GLS) fit by REML. 
+Tab A3 presents a plot of the treatment effect estimates with 95% confidence and the GLS numerical estimates themselves.
+Tab B1 present the same plots that appear on A1, except now the treatment effect manifests after baseline.
+Tab B2 present the GLS and LMM analysis of the revised data. Running a LMM also is useful to validate the estimates of the GLS model and vice versa. We have a country variable, baseline x time and treatment x time interactions. 
+Patients are assigned to country at random in the data generation. We can read the treatment effect coefficient for 'Active-Treatment' for a specific timepoint by releveling the time variable. 
+This is done using the selector. The LMM and GLS estimates should be very similar. 
+The next tab B3 is a copy of A3 but using the data at which the treatment effect manifests after baseline. B4 presents model diagnostics for the GLS model used in the B tabs. 
+                                        C1 is a searchable data listing."),
 
+                                     
+                                     h4("The spaghetti and boxplot figures can be complemented by highlighting any number of individual patients. This is done by selecting the 'Individual' select plot option
+                                        and typing in a patient ID. Patient IDs are just integers from 1 to the total sample size.    
+                                        
+                                        Now what follows is a little discription of the user inputs: N is the total sample size to which treatment is assigned randomly 1:1. J is the maximum visit number in the study including the baseline. 
+                                        'Treatment effect' is the constant average difference Active - Placebo. The next slider allows a different treatment effect at each visit.
+                                        Next we have the fixed effects average intercept and average slope (common to both study arms). The next inputs are for the intercept SD and slope SD 
+                                        and the correlation between the intercept and slope.
+                                        Next is the random error input. The last user input is to allow the treatment effect estimate at the visit of interest to appear directly in the model output. 
+                                        Typically a primary comparison is prespecified, for example a contrast (difference in means) between treatments 
+                                        at a nominated visit/timepoint.
+                                        However treatment effect estimates for all visits are presented in this app.
+                                        
+                                        
+                                        "),
+                                     
+                                     
+                                     h4("..be patient as the GLS models can take ~30 secs to run, also ensure the outputs have been refreshed if you have clicked the simulate button to generate 
+                                     another dataset..."),
+                                     
                             ) 
+                         
+ 
+                            
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         )
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
