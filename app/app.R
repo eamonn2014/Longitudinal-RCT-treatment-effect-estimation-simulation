@@ -57,7 +57,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                   interaction (because the importance of the baseline will usually decrease over time).
                   Confidence intervals are based on the Normal distribution. Often a Kenward Roger
                   adjustment is made 
-                  to adjust the degrees of freedom and a t-dist. calculation used for 
+                  to adjust the degrees of freedom and a t-distribution calculation used for 
                   inference and CIs when sample size is considered small. We also using a mixed effects modelling approach using the 'lmer' package.
                   Data is simulated intially for the treatment effect to start at baseline. This is analyses on tabs starting with 'A'.
                   We then manipulate the simulated data so that the treatment effect can only manifest after baseline, see tabs starting 
@@ -186,7 +186,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                  
                             div(p( strong("References:"))),  
 
-                            tags$a(href = "https://www.slideshare.net/Medresearch/recommendations-for-the-primary-analysis-of-continuous-endpoints", "[1] MMRM"),
+                            tags$a(href = "https://github.com/eamonn2014/Longitudinal-RCT-treatment-effect-estimation-simulation/blob/master/recommendations-for-the-primary-analysis-of-continuous-endpoints4590.pdf", "[1] MMRM"),
                             div(p(" ")),
                             tags$a(href = "https://en.wikipedia.org/wiki/Comprehensive_metabolic_panel", "[2] Comprehensive metabolic panel"),
                             div(p(" ")),
@@ -311,8 +311,8 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("D. Notes", value=3, 
                                      
                                      h5("Be patient as GLS models can take ~30 secs to run.
-                                        Typically a primary comparison is prespecified, for example a contrast (difference in means between treatments 
-                                        at a nominated visit/ timepoint."),
+                                        Typically a primary comparison is prespecified, for example a contrast (difference in means) between treatments 
+                                        at a nominated visit/ timepoint. Running the mixed model is useful to validate the estimates of the GLS model and vice versa."),
                                     
                                      
                                      
@@ -405,7 +405,7 @@ server <- shinyServer(function(input, output   ) {
         x.grid = seq(0, 8, by = 8/J)[0:8]
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # set up unbalanced visits everyone at first visit but randomly end up to max after that
+        # set up unbalanced visits everyone at first visit but randomly end after that
         
         p <- round(runif(N,2,J))                                                 # last visit for each person
         
@@ -419,8 +419,7 @@ server <- shinyServer(function(input, output   ) {
         
         within.unit.df <- data.frame(cbind(unit, j, time))                       # create a data frame
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end unbalanced
-        
-        # merge design and dataand create response
+        # merge design and data and create response
         
         flat.df = merge(unit.df, within.unit.df)
         flat.df <-  within(flat.df, y <-  alpha + time * beta + error * rnorm(n = M))
@@ -428,6 +427,7 @@ server <- shinyServer(function(input, output   ) {
         
         flat.df$treat <- ifelse(flat.df$treat %in% 1, "Active","Placebo" )
         flat.df$treat <- factor(flat.df$treat) ##new
+        
        # flat.df$treat <- relevel(flat.df$treat, ref= "Placebo")   ##new
         return(list(  flat.df = flat.df,  random.effects= random.effects, p=p) )
         
@@ -441,11 +441,10 @@ server <- shinyServer(function(input, output   ) {
       
       sample <- random.sample()
 
-      N        <-  sample$N 
+      N         <-  sample$N 
       intercept <-  sample$beta0 
-      slope    <-  sample$beta1
-      error    <-  sample$sigma
-      
+      slope     <-  sample$beta1
+      error     <-  sample$sigma
       
       flat.df        <- make.data()$flat.df
       random.effects <- make.data()$random.effects
@@ -454,9 +453,9 @@ server <- shinyServer(function(input, output   ) {
       nbaseline <- flat.df[(flat.df$time !=0),]  
       
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # all observations that are baseline
+      # select all observations that are baseline
       baseline <- flat.df[(flat.df$time ==0),]  
-      # overwrite so no treatment effect manifests at baseline
+      # overwrite so that no treatment effect manifests at baseline
       baseline$alpha <- intercept + random.effects[, 1]
       baseline$beta <-  slope     + random.effects[, 2]
       
