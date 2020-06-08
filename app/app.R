@@ -83,7 +83,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             br(), br(),
                             tags$style(".well {background-color:#b6aebd ;}"), 
                             
-                          div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below"))),
+                          div(h5(tags$span(style="color:blue", "Select the parameters using the sliders below...be patient as the GLS models can take ~30 secs to run..."))),
                             tags$head(
                               tags$style(HTML('#ab1{background-color:orange}'))
                             ),
@@ -181,7 +181,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("A1. Plot & LMM", 
                                      
                                      div(plotOutput("reg.plot1", width=fig.width, height=fig.height)),  
-                                     h4(paste("Figure 1. Spaghetti plot of simulated data, treatment effect starting at baseline, with mean trend lines")), 
+                                     h4(paste("Figure 1. Spaghetti plot of simulated data, every patient profile is plotted, treatment effect starting at baseline, with mean trend lines")), 
                                      h3(" "),
                                      div(plotOutput("reg.plot3", width=fig.width, height=fig.height)), 
                                      h4(paste("Figure 2. Boxplots of simulated data")), 
@@ -212,7 +212,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             tabPanel("B1. Plots", 
                                      
                                      div(plotOutput("reg.plot99", width=fig.width, height=fig.height)), 
-                                     h4(paste("Figure 4. Spaghetti plot of simulated data, treatment effect starting after baseline, with mean trend lines")), 
+                                     h4(paste("Figure 4. Spaghetti plot of simulated data, every patient profile is plotted, treatment effect starting after baseline, with mean trend lines")), 
                                      
                                      div(plotOutput("reg.plot33", width=fig.width, height=fig.height)),  
                                      h4(paste("Figure 5. Boxplots of simulated data, reflecting treatment effect starting after baseline")), 
@@ -257,6 +257,31 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                             ),
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("D. Notes", value=3, 
+                                     
+                                     
+                                     h4("
+                                     
+                                     There are many advantages of longitudinal studies compared to cross-sectional studies. 
+Repeated measurements from the same subject are not perfectly correlated, the result is that the repeated measurements from a single 
+subject provide more independent information than a single measurement obtained from a single subject.
+ 
+
+An interesting feature of many longitudinal data sets are the proﬁles of the responses within a subject over time. 
+The sphagetti plot is a plot of the individual subject’s response plotted against time. 
+On top of the population average, individuals may have trends that diﬀer in pattern from the population average, 
+and these patterns must also be modeled for proper inference in a longitudinal data set.
+
+  A mixed models analysis of such a study does not require 
+complete data from all subjects. This results in more appropriate estimates 
+of the effect of treatment and their standard errors. 
+The mixed model also gives great ﬂexibility in analysis, 
+in that it can allow for a wide variety of ways in which the 
+successive observations are correlated with one another.
+  
+  
+Further, it is often said it is usually cheaper to collect additional data from a subject already in a study than it is to recruit a 
+new patient.
+ "),
                                   
                                      h4("Tab A1 presents a sphagetti plot of the data over time with mean lines drawn. 
                                         You can see a treatment effect is already apparant at baseline. We also present boxplots over time joining patients and showing a count of data points at each visit. 
@@ -283,8 +308,15 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                                         However treatment effect estimates for all visits are presented in this app."),
                                      
                                      
+                           
+                                     
+  
+                                     
+                                     
                                      h4("...be patient as the GLS models can take ~30 secs to run, also ensure the outputs have been refreshed if you have clicked the simulate button to generate 
                                      another dataset..."),
+                                     
+                                     
                                      
                             ) 
                          
