@@ -53,7 +53,7 @@ ui <- fluidPage(theme = shinytheme("journal"), #https://www.rdocumentation.org/p
                   Confidence intervals are based on the Normal distribution. Often a Kenward Roger
                   adjustment is made 
                   to adjust the degrees of freedom and a t-distribution calculation used for 
-                  inference and CIs when sample size is considered small. We also using a mixed effects modelling approach using the 'lmer' package.
+                  inference and CIs when sample size is considered small. We also use a mixed effects modelling approach using the 'lmer' package.
                   Data is simulated intially for the treatment effect to start at baseline. This is the analysis on tabs starting with 'A'.
                   We then manipulate the simulated data so that the treatment effect can only manifest after baseline, see tabs starting 
                   with 'B'. We also allow individual patient profiles to be visualised.
