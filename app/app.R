@@ -903,7 +903,7 @@ server <- shinyServer(function(input, output   ) {
                     position = pd, size=3, show.legend = FALSE) 
         
         
-        print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
+        print(pr1 + labs(y="Response", x = 'Visit') +    
                 ggtitle(paste0("There are N=",
                                length(unique(d$rep)),  
                                " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
@@ -1060,7 +1060,7 @@ server <- shinyServer(function(input, output   ) {
          
         k1 <- as.data.frame(k1a)
         
-        xl <- xlab( 'Follow up visit (baseline not shown)')
+        xl <- xlab( 'Visit')
         
         ggplot (k1, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
           ylim(mi,ma) +
@@ -1172,7 +1172,7 @@ server <- shinyServer(function(input, output   ) {
                       position = pd, size=3, show.legend = FALSE) 
 
 
-          print(pr1 + labs(y="Response", x = 'Follow up vists (baseline not shown)') +    
+          print(pr1 + labs(y="Response", x = 'Visit') +    
                   ggtitle(paste0("There are N=",
                                  length(unique(d$rep)),  
                                  " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
