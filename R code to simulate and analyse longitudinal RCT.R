@@ -6,6 +6,7 @@
   set.seed(2345)
   library(mvtnorm) 
   library(rms)
+  library(nlme)
 
   # inoputs
   N <- 600   # total patients
