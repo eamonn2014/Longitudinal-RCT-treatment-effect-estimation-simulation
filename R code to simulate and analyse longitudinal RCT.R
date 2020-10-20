@@ -120,11 +120,11 @@
     
     #j works but not time consecutive integer error?
     table(tmp$j, tmp$time)
-    tmp$j <- as.factor(tmp$j )
+   tmp$j <- as.numeric(as.character(tmp$j ))
     
     fit.res <- NULL
     (fit.res <-
-        tryCatch(Gls(y  ~ treat + j * treat ,
+        tryCatch(Gls(y  ~ treat + rcs(j,3) * treat ,
                      correlation=corSymm(form = ~as.numeric(j) | unit) ,
                      weights=varIdent(form=~1|j),
                      tmp, x=TRUE,
@@ -340,7 +340,7 @@
       k1a <- contrast(fit.res, list(time=time.,  treat ="Active" ),
                       list(time=time.,  treat = "Placebo" ))
       
-      x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
+      x <- as.data.frame(k1a[c('time', 'Contrast', 'Lower', 'Upper')]) 
       
       namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
       
